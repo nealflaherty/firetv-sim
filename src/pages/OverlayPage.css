@@ -1,0 +1,42 @@
+.overlay-page {
+  min-height: 100vh;
+  background: #111;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+  gap: 16px;
+}
+
+.overlay-page__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.overlay-page__toolbar a {
+  color: #7af;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.overlay-page__toolbar button {
+  padding: 6px 16px;
+  background: #333;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.overlay-page__toolbar button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.overlay-page__info {
+  color: #aaa;
+  font-size: 14px;
+  font-family: monospace;
+}
