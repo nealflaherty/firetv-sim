@@ -1,5 +1,5 @@
 .home-page {
-  background: #0d0d1a;
+  background: #000100;
   width: 100vw;
   height: 100vh;
   overflow: hidden;
@@ -9,7 +9,7 @@
   position: relative;
   width: 100%;
   aspect-ratio: 1920 / 1080;
-  background: #1a1a2e;
+  background: #000100;
   overflow: hidden;
 }
 
@@ -78,6 +78,14 @@
   transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* --- Below-hero layer (pushed down when hero expands) --- */
+
+.below-hero {
+  position: absolute;
+  inset: 0;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* --- Nav --- */
 
 .nav-bg {
@@ -132,7 +140,7 @@
   padding-left: 5.4%;
   z-index: 3;
   color: #fff;
-  background: #1a1a2e;
+  background: #000100;
   padding-bottom: 1%;
 }
 

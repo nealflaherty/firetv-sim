@@ -71,83 +71,85 @@ export function HomePage() {
   const shift = state === 'hero' ? 0 : state === 'row1' ? NAV_TOP : NAV_TOP + NAV_H
   const tileOffset1 = row >= 1 ? DETAIL_H : 0
   const tileOffset2 = row >= 1 ? DETAIL_H : 0
-  const contentShift = expanded ? (100 - HERO_H) : 0
 
   const selectedLabel = row === 1 ? ROW_1.items[col]?.label : ROW_2.items[col]?.label
 
   return (
     <div className="home-page">
       <div className={`viewport state-${state}`}>
-        <div className={`hero${expanded ? ' hero--expanded' : ''}`} style={{ height: expanded ? '100%' : `${HERO_H}%` }}>
-          <video className="hero__bg" src="/hero-trailer.webm" autoPlay muted loop playsInline />
-          <div className="hero__overlay" style={{ opacity: expanded ? 0 : 1 }}>
-            <div className="hero__cta" style={{ left: `${HERO_CTA.left}%`, top: `${HERO_CTA.top}%`, width: `${HERO_CTA.width}%`, height: `${HERO_CTA.height}%` }}>
-              <img src="/fragments/IQBAR_Plant_Based_Protein_Bars_2.png" alt="" draggable={false} />
-              <img src="/fragments/Learn_More.png" alt="Learn More" draggable={false} />
-            </div>
-            <div className="hero__dots" style={{ left: `${HERO_DOTS.left}%`, top: `${HERO_DOTS.top}%` }}>
-              <span className="hero__dot hero__dot--active" />
-              <span className="hero__dot" />
-              <span className="hero__dot" />
+        {/* Content layer — hero, nav, detail, tiles all in 1080-space */}
+        <div className="content-layer" style={{ transform: `translateY(-${shift}%)` }}>
+          <div className={`hero${expanded ? ' hero--expanded' : ''}`} style={{ height: expanded ? '100%' : `${HERO_H}%` }}>
+            <video className="hero__bg" src="https://abexlcnaaaaaaaamletu7vv43fzhj.mid-pop-vod-dash.main.amazon.pv-cdn.net/dm/3$0CiEIAhoFZW5fVVMgJTABUgaAwAKB8AN6A4C4F4IBAQGIAQQYAQ/iad_2/394d/7b22/7552/4d05-9f61-1e6826fd0b69/9297c5d3-d3f7-45a4-9918-77427ee09bc8_video_9.mp4?amznDtid=AOAGZA014O5RE&amznPN=xp&amznPV=ATVWebPlayerSDK-1.0.235484.0" autoPlay muted loop playsInline />
+            <div className="hero__overlay" style={{ opacity: expanded ? 0 : 1 }}>
+              <div className="hero__cta" style={{ left: `${HERO_CTA.left}%`, top: `${HERO_CTA.top}%`, width: `${HERO_CTA.width}%`, height: `${HERO_CTA.height}%` }}>
+                <img src="/fragments/IQBAR_Plant_Based_Protein_Bars_2.png" alt="" draggable={false} />
+                <img src="/fragments/Learn_More.png" alt="Learn More" draggable={false} />
+              </div>
+              <div className="hero__dots" style={{ left: `${HERO_DOTS.left}%`, top: `${HERO_DOTS.top}%` }}>
+                <span className="hero__dot hero__dot--active" />
+                <span className="hero__dot" />
+                <span className="hero__dot" />
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="content-layer" style={{ transform: `translateY(${contentShift - shift}%)` }}>
-          <div className="nav-bg" style={{ top: `${NAV_TOP}%`, height: `${NAV_H}%` }} />
+          <div className="below-hero" style={{ transform: expanded ? `translateY(${100 - HERO_H}%)` : undefined }}>
+            <div className="nav-bg" style={{ top: `${NAV_TOP}%`, height: `${NAV_H}%` }} />
 
-          {ALL_NAV.map((item, i) => (
-            <div
-              key={item.label}
-              className={`nav-item${isFocused(0, i) ? ' focused' : ''}`}
-              style={{ left: `${item.left}%`, top: `${item.top}%`, width: `${item.width}%`, height: `${item.height}%` }}
-            >
-              <img src={item.img} alt={item.label} draggable={false} />
-              {isFocused(0, i) && <span className="focus-label">{item.label}</span>}
-            </div>
-          ))}
-
-          {inContent && (
-            <div className="detail-panel" style={{ top: `${shift + 12.4}%` }}>
-              <h1 className="detail-title">{selectedLabel}</h1>
-              <div className="detail-meta">
-                <img src="/fragments/IMDB_Rating_6_8_out_of_10.png" alt="IMDb 6.8" />
-                <img src="/fragments/from_93018_customers.png" alt="93K ratings" />
-                <img src="/fragments/1_hour_41_minutes.png" alt="1h 41m" />
-                <img src="/fragments/2023.png" alt="2023" />
-                <img src="/fragments/Rated_R.png" alt="R" />
-                <img src="/fragments/X-ray_available.png" alt="X-Ray" />
-                <img src="/fragments/Closed_captioning_available.png" alt="CC" />
-                <img src="/fragments/Available_in_UHD.png" alt="UHD" />
-              </div>
-              <p className="detail-desc">
-                <img src="/fragments/An_ordinary_family_man_Nicolas_Cage_finds_his_life_turned_upside_down_when_milli.png" alt="Description" />
-              </p>
-              <div className="detail-entitlement">
-                <img src="/fragments/Free_with_Ads_Play_now_on_Tubi.png" alt="Free with Ads" />
-              </div>
-            </div>
-          )}
-
-          {ROW_1.items.map((item, i) => {
-            const s = tileStyle(ROW_1, i)
-            return (
-              <div key={item.label} className={`tile${isFocused(1, i) ? ' focused' : ''}`}
-                style={{ ...s, top: `${parseFloat(s.top) + tileOffset1}%`, opacity: row >= 2 ? 0 : 1 }}>
+            {ALL_NAV.map((item, i) => (
+              <div
+                key={item.label}
+                className={`nav-item${isFocused(0, i) ? ' focused' : ''}`}
+                style={{ left: `${item.left}%`, top: `${item.top}%`, width: `${item.width}%`, height: `${item.height}%` }}
+              >
                 <img src={item.img} alt={item.label} draggable={false} />
+                {isFocused(0, i) && <span className="focus-label">{item.label}</span>}
               </div>
-            )
-          })}
+            ))}
 
-          {ROW_2.items.map((item, i) => {
-            const s = tileStyle(ROW_2, i)
-            return (
-              <div key={item.label} className={`tile${isFocused(2, i) ? ' focused' : ''}`}
-                style={{ ...s, top: `${parseFloat(s.top) + tileOffset2}%` }}>
-                <img src={item.img} alt={item.label} draggable={false} />
+            {inContent && (
+              <div className="detail-panel" style={{ top: `${shift + 12.4}%` }}>
+                <h1 className="detail-title">{selectedLabel}</h1>
+                <div className="detail-meta">
+                  <img src="/fragments/IMDB_Rating_6_8_out_of_10.png" alt="IMDb 6.8" />
+                  <img src="/fragments/from_93018_customers.png" alt="93K ratings" />
+                  <img src="/fragments/1_hour_41_minutes.png" alt="1h 41m" />
+                  <img src="/fragments/2023.png" alt="2023" />
+                  <img src="/fragments/Rated_R.png" alt="R" />
+                  <img src="/fragments/X-ray_available.png" alt="X-Ray" />
+                  <img src="/fragments/Closed_captioning_available.png" alt="CC" />
+                  <img src="/fragments/Available_in_UHD.png" alt="UHD" />
+                </div>
+                <p className="detail-desc">
+                  <img src="/fragments/An_ordinary_family_man_Nicolas_Cage_finds_his_life_turned_upside_down_when_milli.png" alt="Description" />
+                </p>
+                <div className="detail-entitlement">
+                  <img src="/fragments/Free_with_Ads_Play_now_on_Tubi.png" alt="Free with Ads" />
+                </div>
               </div>
-            )
-          })}
+            )}
+
+            {ROW_1.items.map((item, i) => {
+              const s = tileStyle(ROW_1, i)
+              return (
+                <div key={item.label} className={`tile${isFocused(1, i) ? ' focused' : ''}`}
+                  style={{ ...s, top: `${parseFloat(s.top) + tileOffset1}%`, opacity: row >= 2 ? 0 : 1 }}>
+                  <img src={item.img} alt={item.label} draggable={false} />
+                </div>
+              )
+            })}
+
+            {ROW_2.items.map((item, i) => {
+              const s = tileStyle(ROW_2, i)
+              return (
+                <div key={item.label} className={`tile${isFocused(2, i) ? ' focused' : ''}`}
+                  style={{ ...s, top: `${parseFloat(s.top) + tileOffset2}%` }}>
+                  <img src={item.img} alt={item.label} draggable={false} />
+                </div>
+              )
+            })}
+          </div>
         </div>
 
         {state === 'row2' && (
