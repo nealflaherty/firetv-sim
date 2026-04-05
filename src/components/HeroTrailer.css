@@ -1,0 +1,64 @@
+.hero {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1;
+  transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hero__bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hero__overlay {
+  position: absolute;
+  inset: 0;
+  transition: opacity 0.4s ease;
+}
+
+.hero--expanded::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 30%;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  pointer-events: none;
+}
+
+.hero__cta {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 2%;
+}
+
+.hero__cta img {
+  height: auto;
+  max-width: 100%;
+}
+
+.hero__dots {
+  position: absolute;
+  display: flex;
+  gap: 0.4vw;
+  align-items: center;
+}
+
+.hero__dot {
+  width: 0.6vw;
+  height: 0.6vw;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.hero__dot--active {
+  width: 1.4vw;
+  border-radius: 0.3vw;
+  background: #fff;
+}

@@ -1,0 +1,77 @@
+.nav-bar {
+  position: relative;
+  width: 100%;
+  height: 8.889%; /* NAV_H = 96/1080 */
+  background: rgba(0, 0, 0, 0.5);
+  flex-shrink: 0;
+}
+
+/* Nav items layer — fills the bar */
+.nav-bar__items {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 4.79%;
+  transition: opacity 0.4s ease;
+}
+
+.nav-bar__items--hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Breadcrumb layer — same space, crossfades in */
+.nav-bar__breadcrumb {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding-left: 5.4%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.nav-bar__breadcrumb--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.nav-bar__breadcrumb img {
+  height: 2vw;
+}
+
+.nav-bar__group {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.nav-bar__group--menu .nav-item {
+  height: 83.33%;
+  aspect-ratio: 96 / 80;
+}
+
+.nav-bar__group--apps {
+  gap: 0.417vw;
+}
+
+.nav-bar__group--apps .nav-item {
+  height: 83.33%;
+  aspect-ratio: 144 / 80;
+}
+
+.nav-bar__separator {
+  width: 3.75vw;
+  flex-shrink: 0;
+}
+
+.nav-bar__group--utils {
+  gap: 0.417vw;
+}
+
+.nav-bar__group--utils .nav-item {
+  height: 83.33%;
+  aspect-ratio: 1 / 1;
+}

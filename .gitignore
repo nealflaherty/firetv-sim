@@ -27,3 +27,6 @@ dist-ssr
 .wip/
 capture/
 trailers/
+
+*storybook.log
+storybook-static
