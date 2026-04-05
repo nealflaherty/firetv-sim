@@ -8,7 +8,7 @@ export function Breadcrumb({ visible }: Props) {
   if (!visible) return null;
   return (
     <div className="breadcrumb">
-      <img src="/fragments/Home_breadcrumb.png" alt="Home" draggable={false} />
+      <img src="/fragments/Home_breadcrumb.svg" alt="Home" draggable={false} />
     </div>
   );
 }

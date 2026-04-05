@@ -43,6 +43,7 @@ export function NavBar({ focusedIndex, showBreadcrumb = false }: Props) {
               label={item.label}
               img={item.img}
               focused={focusedIndex === APP_SHORTCUTS_OFFSET + i}
+              variant="app"
             />
           ))}
         </div>
@@ -54,11 +55,13 @@ export function NavBar({ focusedIndex, showBreadcrumb = false }: Props) {
             label={NAV_OVERFLOW.label}
             img={NAV_OVERFLOW.img}
             focused={focusedIndex === OVERFLOW_INDEX}
+            variant="app"
           />
           <NavItem
             label={NAV_SETTINGS.label}
             img={NAV_SETTINGS.img}
             focused={focusedIndex === SETTINGS_INDEX}
+            variant="app"
           />
         </div>
       </div>
@@ -67,7 +70,7 @@ export function NavBar({ focusedIndex, showBreadcrumb = false }: Props) {
         className={`nav-bar__breadcrumb${showBreadcrumb ? " nav-bar__breadcrumb--visible" : ""}`}
       >
         <img
-          src="/fragments/Home_breadcrumb.png"
+          src="/fragments/Home_breadcrumb.svg"
           alt="Home"
           draggable={false}
         />

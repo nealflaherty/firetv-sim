@@ -1,30 +1,56 @@
 .nav-item {
   position: relative;
   cursor: pointer;
-  transition:
-    transform 0.15s,
-    box-shadow 0.15s;
   border-radius: 0.4vw;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.nav-item:hover,
-.nav-item.focused {
-  transform: scale(1.1);
+/* Focused state */
+.nav-item--focused {
   z-index: 2;
 }
 
-.nav-item.focused {
-  box-shadow: 0 0 0 0.2vw #fff;
+/* Layer 1: radial glow behind everything */
+.nav-item__glow {
+  position: absolute;
+  inset: -40%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 25%,
+    rgba(255, 255, 255, 0.45) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
 }
 
+/* Layer 2: solid circle matching nav bar background */
+.nav-item__circle {
+  position: absolute;
+  width: 90%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #0d0d0d;
+  pointer-events: none;
+}
+
+/* Layer 3: the icon image */
 .nav-item img {
+  position: relative;
   width: 100%;
   height: 100%;
   object-fit: contain;
   display: block;
 }
 
+/* Brighten icon when focused — only for icon variant (SVG menu items) */
+.nav-item--icon.nav-item--focused img {
+  filter: brightness(1.25);
+}
+
+/* Label below */
 .nav-item__label {
   position: absolute;
   top: 105%;

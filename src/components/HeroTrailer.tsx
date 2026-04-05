@@ -1,4 +1,4 @@
-import { HERO_H, HERO_CTA, HERO_DOTS } from "../layout";
+import { HERO_H, HERO_CTA, HERO_DOTS, NAV_H } from "../layout";
 import "./HeroTrailer.css";
 
 interface Props {
@@ -10,7 +10,7 @@ export function HeroTrailer({ expanded, videoSrc }: Props) {
   return (
     <div
       className={`hero${expanded ? " hero--expanded" : ""}`}
-      style={{ height: expanded ? "100%" : `${HERO_H}%` }}
+      style={{ height: expanded ? `${100 - NAV_H}%` : `${HERO_H}%` }}
     >
       <video
         className="hero__bg"
