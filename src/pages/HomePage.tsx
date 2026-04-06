@@ -209,18 +209,25 @@ export function HomePage() {
               }}
               transition={transition}
             >
-              {contentRows.map((cr, i) => (
-                <motion.div
-                  key={cr.id}
-                  animate={{ opacity: row >= 2 && i < row - 1 ? 0 : 1 }}
-                  transition={transition}
-                >
-                  <TileRow
-                    items={cr.items}
-                    focusedIndex={row === i + 1 ? col : null}
-                  />
-                </motion.div>
-              ))}
+              {contentRows.map((cr, i) => {
+                const isFocusedRow = row === i + 1;
+                return (
+                  <motion.div
+                    key={cr.id}
+                    animate={{ opacity: row >= 2 && i < row - 1 ? 0 : 1 }}
+                    transition={transition}
+                    style={{
+                      position: "relative",
+                      zIndex: isFocusedRow ? 10 : 1,
+                    }}
+                  >
+                    <TileRow
+                      items={cr.items}
+                      focusedIndex={isFocusedRow ? col : null}
+                    />
+                  </motion.div>
+                );
+              })}
             </motion.div>
           </div>
         </motion.div>

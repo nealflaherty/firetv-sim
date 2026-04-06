@@ -15,6 +15,8 @@
   height: 100%;
   border-radius: 0.4vw;
   overflow: hidden;
+  box-shadow: 0 0 0 transparent;
+  transition: box-shadow 0.3s ease;
 }
 
 /* Glow behind the tile when focused */
@@ -43,6 +45,9 @@
 
 /* Border with rotating highlight */
 .tile.focused .tile__inner {
+  box-shadow:
+    0 1.5vw 3vw rgba(0, 0, 0, 1),
+    0 0.5vw 1vw rgba(0, 0, 0, 0.8);
   border: none;
   padding: 4px;
   background: conic-gradient(
