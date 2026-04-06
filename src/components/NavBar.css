@@ -54,7 +54,7 @@
 }
 
 .nav-bar__group--menu .nav-item {
-  height: min(4vw, 6vh);
+  height: 4vw;
   aspect-ratio: 96 / 80;
 }
 
@@ -63,7 +63,7 @@
 }
 
 .nav-bar__group--apps .nav-item {
-  height: min(4vw, 6vh);
+  height: 4vw;
   aspect-ratio: 144 / 80;
 }
 
@@ -77,6 +77,6 @@
 }
 
 .nav-bar__group--utils .nav-item {
-  height: min(4vw, 6vh);
+  height: 4vw;
   aspect-ratio: 1 / 1;
 }
