@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { NAV_TOP, NAV_H, ALL_NAV } from "../layout";
+import { NAV_TOP, ALL_NAV } from "../layout";
 import { useHomeData } from "../lib/useHomeData";
 import { generateContentForCategory } from "../lib/placeholderContent";
 import { HeroTrailer } from "../components/HeroTrailer";
@@ -154,13 +154,18 @@ export function HomePage() {
         )}
 
         <motion.div
-          className="below-hero"
-          animate={{ y: expanded ? `${100 - NAV_TOP - NAV_H}%` : "0%" }}
+          className={`below-hero${expanded ? " below-hero--expanded" : ""}`}
           transition={transition}
         >
           <motion.div
             className={`below-hero__spacer${expanded ? " below-hero__spacer--expanded" : ""}`}
-            animate={{ height: inContent ? "0%" : `${NAV_TOP}%` }}
+            animate={{
+              height: inContent
+                ? "0%"
+                : expanded
+                  ? "calc(100% - 7vw)"
+                  : `${NAV_TOP}%`,
+            }}
             transition={transition}
           >
             <div className="carousel-controls">
@@ -192,7 +197,15 @@ export function HomePage() {
             translucent={expanded}
           />
 
-          <div className="content-rows">
+          <motion.div
+            className="content-rows"
+            animate={{
+              opacity: expanded ? 0 : 1,
+              height: expanded ? 0 : "auto",
+            }}
+            transition={transition}
+            style={{ overflow: "hidden" }}
+          >
             <AnimatePresence initial={false}>
               {inContent && (
                 <motion.div
@@ -249,7 +262,7 @@ export function HomePage() {
                 </motion.div>
               </AnimatePresence>
             </div>
-          </div>
+          </motion.div>
         </motion.div>
       </div>
     </div>

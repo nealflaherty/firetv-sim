@@ -30,6 +30,9 @@
   flex-direction: column;
 }
 
+.below-hero--expanded {
+}
+
 .below-hero__spacer {
   flex-shrink: 0;
   display: flex;
@@ -58,7 +61,6 @@
 .content-rows {
   display: flex;
   flex-direction: column;
-  flex: 1;
   background: var(--color-bg);
   position: relative;
 }
