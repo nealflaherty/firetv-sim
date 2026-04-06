@@ -1,11 +1,11 @@
 .tile {
   position: relative;
-  height: 100%;
+  flex: 1 1 0;
+  min-width: 0;
   aspect-ratio: 336 / 183;
   border-radius: 0.4vw;
   overflow: hidden;
   cursor: pointer;
-  flex-shrink: 0;
   transition:
     transform 0.2s,
     box-shadow 0.2s;

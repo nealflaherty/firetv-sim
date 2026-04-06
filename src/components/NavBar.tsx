@@ -53,8 +53,6 @@ export function NavBar({
           ))}
         </div>
 
-        <div className="nav-bar__separator" />
-
         <div className="nav-bar__group nav-bar__group--utils">
           <NavItem
             label={NAV_OVERFLOW.label}

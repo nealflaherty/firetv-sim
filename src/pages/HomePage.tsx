@@ -122,7 +122,7 @@ export function HomePage() {
             }}
           >
             <div
-              className="below-hero__spacer"
+              className={`below-hero__spacer${expanded ? " below-hero__spacer--expanded" : ""}`}
               style={{ height: `${NAV_TOP}%` }}
             >
               <div className="carousel-controls">
@@ -161,7 +161,11 @@ export function HomePage() {
                 focusedIndex={row === 1 ? col : null}
                 scrolledOut={row >= 2}
               />
-              <TileRow row={ROW_2} focusedIndex={row === 2 ? col : null} />
+              <TileRow
+                row={ROW_2}
+                focusedIndex={row === 2 ? col : null}
+                shiftUp={row >= 2}
+              />
             </div>
           </div>
         </div>
