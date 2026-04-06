@@ -6,11 +6,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.1s ease;
 }
 
 /* Focused state */
 .nav-item--focused {
   z-index: 2;
+  transform: scale(1.2);
+}
+
+.nav-item--app.nav-item--focused {
+  z-index: 5;
+  filter: drop-shadow(0 0.3vw 0.8vw rgba(0, 0, 0, 0.7));
 }
 
 /* Shimmer sweep on focused app nav items only */
