@@ -21,55 +21,56 @@ const CATEGORY_CONTENT: Record<string, CategoryContent> = {
   "My Stuff": {
     rows: [
       {
-        title: "Continue Watching",
+        title: "Purchases and Rentals",
         items: [
           {
-            title: "The Office",
+            title: "Moana (Bonus Content)",
+            description: "Go behind the scenes of the animated adventure.",
+          },
+          {
+            title: "Sesame Street: Elmo Says Boo!",
             description:
-              "Season 3, Episode 12 — Michael starts his own paper company.",
+              "Elmo and friends celebrate Halloween on Sesame Street.",
           },
           {
-            title: "Breaking Bad",
-            description: "Season 5, Episode 3 — Walt expands his empire.",
+            title: "Twilight (4K UHD)",
+            description:
+              "A teenage girl risks everything when she falls in love with a vampire.",
           },
           {
-            title: "Stranger Things",
-            description: "Season 4, Episode 7 — Eleven faces her past.",
+            title: "Almost Love",
+            description:
+              "Five interconnected couples navigate love in New York City.",
           },
           {
-            title: "The Mandalorian",
-            description: "Season 2, Episode 5 — A familiar face returns.",
-          },
-          {
-            title: "Fleabag",
-            description: "Season 2, Episode 4 — The priest makes a confession.",
+            title: "Good Will Hunting",
+            description: "A janitor at MIT has a gift for mathematics.",
           },
         ],
       },
       {
-        title: "Your Watchlist",
+        title: "Watchlist",
         items: [
           {
-            title: "Oppenheimer",
-            description: "The story of the atomic bomb and the man behind it.",
+            title: "Blaze and the Monster Machines Season 4",
+            description: "Blaze and AJ take on new adventures in Axle City.",
           },
           {
-            title: "Dune: Part Two",
-            description: "Paul Atreides unites with the Fremen.",
-          },
-          {
-            title: "Poor Things",
+            title: "Supernatural: The Complete Second Season",
             description:
-              "A young woman is brought back to life by a scientist.",
+              "Sam and Dean continue hunting supernatural creatures.",
           },
           {
-            title: "Killers of the Flower Moon",
-            description: "The Osage murders and the birth of the FBI.",
+            title: "Nirvanna the Band the Show the Movie",
+            description: "Two best friends try to get a gig at a local bar.",
           },
           {
-            title: "Past Lives",
-            description:
-              "Two childhood friends reconnect decades later in New York.",
+            title: "New Girl Season 4",
+            description: "Jess and her roommates navigate life and love in LA.",
+          },
+          {
+            title: "Planet Earth Season 1",
+            description: "David Attenborough narrates the natural world.",
           },
         ],
       },
@@ -133,54 +134,22 @@ const CATEGORY_CONTENT: Record<string, CategoryContent> = {
   Find: {
     rows: [
       {
-        title: "Trending Now",
+        title: "Browse",
         items: [
           {
-            title: "Shogun",
-            description: "An English sailor navigates feudal Japan.",
+            title: "Appstore",
+            description: "Browse and download apps for your Fire TV.",
+          },
+          { title: "Free", description: "Watch free movies and TV shows." },
+          {
+            title: "Movies",
+            description: "Browse movies across all services.",
           },
           {
-            title: "The Bear",
-            description: "A chef returns home to run the family restaurant.",
+            title: "TV Shows",
+            description: "Browse TV shows across all services.",
           },
-          {
-            title: "Fallout",
-            description: "Survivors navigate a post-apocalyptic wasteland.",
-          },
-          {
-            title: "Baby Reindeer",
-            description: "A comedian deals with a stalker.",
-          },
-          {
-            title: "Ripley",
-            description:
-              "A con artist assumes another man's identity in 1960s Italy.",
-          },
-        ],
-      },
-      {
-        title: "Top Rated Movies",
-        items: [
-          {
-            title: "The Shawshank Redemption",
-            description: "Two imprisoned men bond over years.",
-          },
-          {
-            title: "The Godfather",
-            description: "The aging patriarch transfers control to his son.",
-          },
-          {
-            title: "The Dark Knight",
-            description: "Batman faces the Joker in Gotham City.",
-          },
-          {
-            title: "Pulp Fiction",
-            description: "Interconnected stories of crime in Los Angeles.",
-          },
-          {
-            title: "Schindler's List",
-            description: "A businessman saves over a thousand Jewish refugees.",
-          },
+          { title: "Games", description: "Browse games for your Fire TV." },
         ],
       },
     ],
@@ -245,47 +214,45 @@ const CATEGORY_CONTENT: Record<string, CategoryContent> = {
         title: "Live Now",
         items: [
           {
-            title: "CNN Live",
-            description: "Breaking news and live coverage.",
+            title: "CNN Headlines",
+            description: "Breaking news and live coverage from CNN.",
           },
           {
-            title: "ESPN SportsCenter",
-            description: "Live sports updates and highlights.",
-          },
-          { title: "NBC Nightly News", description: "Evening news broadcast." },
-          {
-            title: "Fox Weather",
-            description: "Live weather forecasts and storm tracking.",
+            title: "CSI: Crime Scene Investigation",
+            description:
+              "A team of forensic investigators solve crimes in Las Vegas.",
           },
           {
-            title: "Bloomberg TV",
-            description: "Live financial news and market data.",
+            title: "Introduction to Astrophysics",
+            description:
+              "Explore the universe through the lens of astrophysics.",
+          },
+          {
+            title: "PAW Patrol",
+            description: "Live episodes of the rescue pup adventures.",
+          },
+          {
+            title: "South Park",
+            description:
+              "The animated comedy series from Trey Parker and Matt Stone.",
           },
         ],
       },
       {
-        title: "Upcoming",
+        title: "Guide",
         items: [
           {
-            title: "Thursday Night Football",
-            description: "Live NFL action every Thursday.",
+            title: "SpongeBob SquarePants",
+            description:
+              "The adventures of a sea sponge and his friends in Bikini Bottom.",
           },
           {
-            title: "Premier League",
-            description: "English football live matches.",
+            title: "SpongeBob SquarePants Universe",
+            description: "Explore the expanded SpongeBob universe.",
           },
-          {
-            title: "NBA Courtside",
-            description: "Live basketball games and analysis.",
-          },
-          {
-            title: "Concert Live",
-            description: "Live music performances and festivals.",
-          },
-          {
-            title: "Award Show",
-            description: "Live coverage of major award ceremonies.",
-          },
+          { title: "CNN Headlines", description: "24/7 news coverage." },
+          { title: "CSI", description: "Crime scene investigation drama." },
+          { title: "PAW Patrol", description: "More rescue adventures." },
         ],
       },
     ],
@@ -348,53 +315,55 @@ const CATEGORY_CONTENT: Record<string, CategoryContent> = {
   "Prime Video": {
     rows: [
       {
-        title: "Included with Prime",
+        title: "Movies we think you'll like",
         items: [
           {
-            title: "The Boys",
-            description: "Vigilantes take on corrupt superheroes.",
-          },
-          {
-            title: "Reacher",
-            description: "Jack Reacher investigates a murder in a small town.",
-          },
-          {
-            title: "The Marvelous Mrs. Maisel",
-            description: "A housewife pursues stand-up comedy.",
-          },
-          {
-            title: "Citadel",
-            description: "Two spies must rebuild a global spy agency.",
-          },
-          {
-            title: "Upload",
+            title: "Super Wings S6",
             description:
-              "A man's consciousness is uploaded to a virtual afterlife.",
+              "Jett the jet plane delivers packages to kids around the world.",
+          },
+          {
+            title: "Thomas & Friends Classic",
+            description: "The classic adventures of Thomas the Tank Engine.",
+          },
+          {
+            title: "Tumble Leaf - Season 1",
+            description:
+              "A blue fox named Fig explores a whimsical land of adventure.",
+          },
+          {
+            title: "Blue's Clues Season 6",
+            description: "Blue and friends solve clues and puzzles together.",
+          },
+          {
+            title: "Tayo the Little Bus",
+            description: "A friendly little bus learns about the city.",
           },
         ],
       },
       {
-        title: "Rent or Buy",
+        title: "Popular movies",
         items: [
           {
-            title: "Barbie",
-            description: "Barbie and Ken leave Barbieland for the real world.",
+            title: "S4: The Bob Lazar Story",
+            description: "The story of Bob Lazar and Area 51.",
           },
           {
-            title: "John Wick 4",
-            description: "John Wick takes on his most lethal adversaries.",
+            title: "The Passion of the Christ",
+            description: "The final twelve hours of Jesus of Nazareth's life.",
           },
           {
-            title: "Guardians of the Galaxy Vol. 3",
-            description: "The Guardians face their final mission.",
+            title: "PAW Patrol: Rescue Wheels",
+            description: "The pups get new vehicles for their rescue missions.",
           },
           {
-            title: "Spider-Man: Across the Spider-Verse",
-            description: "Miles Morales journeys across the multiverse.",
+            title: "Fire Ants: The Invincible Army",
+            description:
+              "A documentary about the remarkable world of fire ants.",
           },
           {
-            title: "Mission: Impossible — Dead Reckoning",
-            description: "Ethan Hunt faces a dangerous new threat.",
+            title: "Mafia's Greatest Hits",
+            description: "Stories of the most notorious mobsters in history.",
           },
         ],
       },
@@ -460,51 +429,52 @@ const CATEGORY_CONTENT: Record<string, CategoryContent> = {
         title: "Featured on Disney+",
         items: [
           {
-            title: "Loki Season 2",
-            description: "The God of Mischief navigates the multiverse.",
-          },
-          {
-            title: "Ahsoka",
-            description: "Ahsoka Tano searches for Grand Admiral Thrawn.",
-          },
-          {
-            title: "Elemental",
+            title: "Mickey Mouse Clubhouse",
             description:
-              "Fire and water elements discover they have a lot in common.",
+              "Mickey and friends solve problems using basic skills and teamwork.",
           },
           {
-            title: "The Little Mermaid",
-            description: "A live-action retelling of the classic tale.",
+            title: "The Lion Guard",
+            description:
+              "Kion, son of Simba, leads the Lion Guard to protect the Pride Lands.",
           },
           {
-            title: "Secret Invasion",
-            description: "Nick Fury uncovers a Skrull conspiracy.",
+            title: "The Exile",
+            description: "A dramatic tale of survival and redemption.",
+          },
+          {
+            title: "SuperKitties",
+            description:
+              "Four brave kittens use their superpowers to save Kittydale.",
+          },
+          {
+            title: "Mickey Mouse Clubhouse+",
+            description: "More adventures with Mickey and the gang.",
           },
         ],
       },
       {
-        title: "Disney Classics",
+        title: "Disney Junior",
         items: [
           {
-            title: "The Lion King",
-            description: "A young lion prince flees his kingdom.",
+            title: "Minnie's Bow-Toons: Party Palace",
+            description: "Minnie and Daisy run a party planning business.",
           },
           {
-            title: "Frozen",
-            description: "A fearless princess sets off to find her sister.",
+            title: "Minnie's Bow-Toons: Pet Hotel",
+            description: "Minnie opens a pet hotel for adorable animals.",
           },
           {
-            title: "Moana",
-            description:
-              "A teenager sails across the ocean to save her people.",
+            title: "Minnie's Bow-Toons",
+            description: "Minnie Mouse and her bow-tique adventures.",
           },
           {
-            title: "Toy Story",
-            description: "A cowboy doll is threatened by a new spaceman toy.",
+            title: "Mickey's Mousekersize",
+            description: "Get moving with Mickey and friends.",
           },
           {
-            title: "Finding Nemo",
-            description: "A clownfish searches the ocean for his son.",
+            title: "Meet Spidey and his Amazing Friends",
+            description: "Young Peter Parker teams up with Miles and Gwen.",
           },
         ],
       },

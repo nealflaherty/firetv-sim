@@ -1,21 +1,30 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/bash
+# Capture a screenshot + UI dump pair from a connected Fire TV device.
+# Usage: ./scripts/capture.sh [output_dir]
+#
+# Creates timestamped files:
+#   screenshot_YYYYMMDD_HHMMSS.png
+#   uidump_YYYYMMDD_HHMMSS.xml
 
-CAPTURE_DIR="$(dirname "$0")/../capture"
-mkdir -p "$CAPTURE_DIR"
+set -e
 
-TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-SCREENSHOT="screenshot_${TIMESTAMP}.png"
-UI_DUMP="uidump_${TIMESTAMP}.xml"
+OUT_DIR="${1:-capture}"
+mkdir -p "$OUT_DIR"
 
-echo "Capturing screen and UI hierarchy..."
-adb shell screencap -p "/sdcard/${SCREENSHOT}"
-adb shell uiautomator dump "/sdcard/${UI_DUMP}"
+TS=$(date +%Y%m%d_%H%M%S)
+SCREENSHOT="screenshot_${TS}.png"
+UIDUMP="uidump_${TS}.xml"
 
-adb pull "/sdcard/${SCREENSHOT}" "${CAPTURE_DIR}/${SCREENSHOT}"
-adb pull "/sdcard/${UI_DUMP}" "${CAPTURE_DIR}/${UI_DUMP}"
+echo "📸 Capturing screenshot..."
+adb shell screencap -p /sdcard/screenshot.png
+adb pull /sdcard/screenshot.png "$OUT_DIR/$SCREENSHOT" > /dev/null
+adb shell rm /sdcard/screenshot.png
 
-adb shell rm "/sdcard/${SCREENSHOT}" "/sdcard/${UI_DUMP}"
+echo "🔍 Capturing UI dump..."
+adb shell uiautomator dump /sdcard/uidump.xml 2>/dev/null
+adb pull /sdcard/uidump.xml "$OUT_DIR/$UIDUMP" > /dev/null
+adb shell rm /sdcard/uidump.xml
 
-echo "Saved to capture/${SCREENSHOT}"
-echo "Saved to capture/${UI_DUMP}"
+echo "✅ Captured:"
+echo "   $OUT_DIR/$SCREENSHOT"
+echo "   $OUT_DIR/$UIDUMP"
