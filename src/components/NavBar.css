@@ -4,6 +4,12 @@
   height: 8.889%; /* NAV_H = 96/1080 */
   background: rgba(0, 0, 0, 0.5);
   flex-shrink: 0;
+  overflow: hidden;
+  transition: opacity 0.4s ease;
+}
+
+.nav-bar--translucent {
+  opacity: 0.3;
 }
 
 /* Nav items layer — fills the bar */

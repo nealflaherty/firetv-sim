@@ -10,6 +10,7 @@ import "./NavBar.css";
 interface Props {
   focusedIndex: number | null;
   showBreadcrumb?: boolean;
+  translucent?: boolean;
 }
 
 const NAV_ITEMS_OFFSET = 0;
@@ -17,9 +18,13 @@ const APP_SHORTCUTS_OFFSET = NAV_ITEMS.length;
 const OVERFLOW_INDEX = APP_SHORTCUTS_OFFSET + APP_SHORTCUTS.length;
 const SETTINGS_INDEX = OVERFLOW_INDEX + 1;
 
-export function NavBar({ focusedIndex, showBreadcrumb = false }: Props) {
+export function NavBar({
+  focusedIndex,
+  showBreadcrumb = false,
+  translucent = false,
+}: Props) {
   return (
-    <div className="nav-bar">
+    <div className={`nav-bar${translucent ? " nav-bar--translucent" : ""}`}>
       <div
         className={`nav-bar__items${showBreadcrumb ? " nav-bar__items--hidden" : ""}`}
       >

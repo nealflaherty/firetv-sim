@@ -1,13 +1,25 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { NAV_TOP, NAV_H, ALL_NAV, ROW_1, ROW_2 } from "../layout";
-import { HeroTrailer } from "../components/HeroTrailer";
+import { HeroTrailer, type TrailerItem } from "../components/HeroTrailer";
 import { NavBar } from "../components/NavBar";
 import { DetailPanel } from "../components/DetailPanel";
 import { TileRow } from "../components/TileRow";
 import "./HomePage.css";
 
-const HERO_VIDEO_SRC =
-  "https://abexlcnaaaaaaaamletu7vv43fzhj.mid-pop-vod-dash.main.amazon.pv-cdn.net/dm/3$0CiEIAhoFZW5fVVMgJTABUgaAwAKB8AN6A4C4F4IBAQGIAQQYAQ/iad_2/394d/7b22/7552/4d05-9f61-1e6826fd0b69/9297c5d3-d3f7-45a4-9918-77427ee09bc8_video_9.mp4?amznDtid=AOAGZA014O5RE&amznPN=xp&amznPV=ATVWebPlayerSDK-1.0.235484.0";
+const TRAILERS: TrailerItem[] = [
+  {
+    videoSrc:
+      "https://abexlcnaaaaaaaamletu7vv43fzhj.mid-pop-vod-dash.main.amazon.pv-cdn.net/dm/3$0CiEIAhoFZW5fVVMgJTABUgaAwAKB8AN6A4C4F4IBAQGIAQQYAQ/iad_2/394d/7b22/7552/4d05-9f61-1e6826fd0b69/9297c5d3-d3f7-45a4-9918-77427ee09bc8_video_9.mp4?amznDtid=AOAGZA014O5RE&amznPN=xp&amznPV=ATVWebPlayerSDK-1.0.235484.0",
+  },
+  {
+    videoSrc:
+      "https://abexlcnaaaaaaaamlyjrns6ymqkdm.vod-dash.main.amazon.pv-cdn.net/dm/3$0CiEIAhoFZW5fR0IgHzABUgaAwAKB8AN6A4C4F4IBAQGIAQQYAQ/iad_2/91a0/e404/5db9/4796-a1fe-6901ea12d00f/a920aba9-ebf6-46c8-bc0d-3accf0055117_video_12.mp4?amznDtid=AOAGZA014O5RE&amznPN=xp&amznPV=ATVWebPlayerSDK-1.0.235614.0",
+  },
+  {
+    videoSrc:
+      "https://abexlcnaaaaaaaamlsbrxqnoa6uzl.vod-dash.main.amazon.pv-cdn.net/dm/3$0CiEIAhoFZW5fR0IgHzABUgaAwAKB8AN6A4C4F4IBAQGIAQQYAQ/iad_2/ff77/6225/383e/4650-900c-96656dd7d85e/caf5918f-e089-4b42-ab9f-997c4ce36707_video_9.mp4?amznDtid=AOAGZA014O5RE&amznPN=xp&amznPV=ATVWebPlayerSDK-1.0.235614.0",
+  },
+];
 
 const NAV_ROW = ALL_NAV.map((_item, i) => ({ id: `nav-${i}` }));
 const TILE_ROW_1 = ROW_1.items.map((_item, i) => ({ id: `r1-${i}` }));
@@ -20,6 +32,11 @@ export function HomePage() {
   const [pos, setPos] = useState(INITIAL);
   const [expanded, setExpanded] = useState(true);
   const expandedRef = useRef(true);
+  const [trailerIndex, setTrailerIndex] = useState(0);
+
+  const advanceTrailer = useCallback(() => {
+    setTrailerIndex((i) => (i + 1) % TRAILERS.length);
+  }, []);
 
   const [row, col] = pos;
 
@@ -53,7 +70,15 @@ export function HomePage() {
         return;
       }
 
-      if (expandedRef.current) return;
+      // Left/right in expanded state controls the trailer carousel (wraps around)
+      if (expandedRef.current) {
+        if (key === "ArrowLeft") {
+          setTrailerIndex((i) => (i - 1 + TRAILERS.length) % TRAILERS.length);
+        } else if (key === "ArrowRight") {
+          setTrailerIndex((i) => (i + 1) % TRAILERS.length);
+        }
+        return;
+      }
 
       setPos(([r, c]) => {
         if (key === "ArrowLeft") return [r, Math.max(0, c - 1)];
@@ -70,7 +95,6 @@ export function HomePage() {
   const inContent = row >= 1;
   const state = row === 0 ? "hero" : row === 1 ? "row1" : "row2";
 
-  // row2 uses same shift as row1 — nav bar stays visible, just shows breadcrumb
   const shift = state === "hero" ? 0 : NAV_TOP;
   const selectedLabel =
     row === 1 ? ROW_1.items[col]?.label : ROW_2.items[col]?.label;
@@ -82,7 +106,12 @@ export function HomePage() {
           className="content-layer"
           style={{ transform: `translateY(-${shift}%)` }}
         >
-          <HeroTrailer expanded={expanded} videoSrc={HERO_VIDEO_SRC} />
+          <HeroTrailer
+            expanded={expanded}
+            trailers={TRAILERS}
+            activeIndex={trailerIndex}
+            onAdvance={advanceTrailer}
+          />
 
           <div
             className="below-hero"
@@ -92,7 +121,6 @@ export function HomePage() {
                 : undefined,
             }}
           >
-            {/* Spacer for the hero area above the nav */}
             <div
               className="below-hero__spacer"
               style={{ height: `${NAV_TOP}%` }}
@@ -101,6 +129,7 @@ export function HomePage() {
             <NavBar
               focusedIndex={row === 0 ? col : null}
               showBreadcrumb={state === "row2"}
+              translucent={expanded}
             />
 
             <div className="content-rows">
