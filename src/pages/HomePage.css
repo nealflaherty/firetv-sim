@@ -31,6 +31,9 @@
 
 .below-hero__spacer {
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 
 .content-rows {
@@ -38,4 +41,52 @@
   flex-direction: column;
   gap: 1.2%;
   flex: 1;
+}
+
+/* Carousel controls — sits directly above the nav bar in the flow */
+.carousel-controls {
+  padding-left: 5.4%;
+  padding-bottom: 1.2vw;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2vw;
+  flex-shrink: 0;
+}
+
+.carousel-controls__learn-more {
+  background: #5a5a5a;
+  color: #c2c2c2;
+  border: none;
+  border-radius: 999px;
+  padding: 0.6vw 1.8vw;
+  font-size: 1.5vw;
+  cursor: pointer;
+  transition:
+    background 0.3s ease,
+    color 0.3s ease;
+  align-self: flex-start;
+}
+
+.carousel-controls__learn-more--active {
+  background: #fff;
+  color: #000;
+}
+
+.carousel-controls__dots {
+  display: flex;
+  gap: 0.4vw;
+  align-items: center;
+}
+
+.carousel-controls__dot {
+  width: 0.6vw;
+  height: 0.6vw;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.carousel-controls__dot--active {
+  width: 1.4vw;
+  border-radius: 0.3vw;
+  background: #fff;
 }

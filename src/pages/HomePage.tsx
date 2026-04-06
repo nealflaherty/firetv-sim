@@ -124,7 +124,28 @@ export function HomePage() {
             <div
               className="below-hero__spacer"
               style={{ height: `${NAV_TOP}%` }}
-            />
+            >
+              <div className="carousel-controls">
+                <button
+                  className={`carousel-controls__learn-more${expanded ? " carousel-controls__learn-more--active" : ""}`}
+                >
+                  Learn More
+                </button>
+                <div className="carousel-controls__dots">
+                  {[0, 1, 2].map((dot) => {
+                    const last = TRAILERS.length - 1;
+                    const activeDot =
+                      trailerIndex === 0 ? 0 : trailerIndex >= last ? 2 : 1;
+                    return (
+                      <span
+                        key={dot}
+                        className={`carousel-controls__dot${dot === activeDot ? " carousel-controls__dot--active" : ""}`}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
 
             <NavBar
               focusedIndex={row === 0 ? col : null}
