@@ -3,11 +3,15 @@
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
 }
 
 .viewport {
   position: relative;
   width: 100%;
+  max-height: 100vh;
   aspect-ratio: 1920 / 1080;
   background: #1a1a1a;
   overflow: hidden;
@@ -58,6 +62,7 @@
   flex-direction: column;
   gap: 1.2%;
   flex: 1;
+  background: #1a1a1a;
 }
 
 /* Carousel controls — sits directly above the nav bar in the flow */
