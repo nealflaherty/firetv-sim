@@ -1,14 +1,11 @@
 import { useRef } from "react";
+import type { Trailer } from "../lib/types";
 import { HERO_H, HERO_CTA, NAV_H } from "../layout";
 import "./HeroTrailer.css";
 
-export interface TrailerItem {
-  videoSrc: string;
-}
-
 interface Props {
   expanded: boolean;
-  trailers: TrailerItem[];
+  trailers: Trailer[];
   activeIndex: number;
   onAdvance?: () => void;
 }

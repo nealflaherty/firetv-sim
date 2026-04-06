@@ -60,9 +60,14 @@
 .content-rows {
   display: flex;
   flex-direction: column;
-  gap: 1.2%;
   flex: 1;
   background: #1a1a1a;
+}
+
+.tile-scroll {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Carousel controls — sits directly above the nav bar in the flow */

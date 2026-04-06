@@ -1,31 +1,20 @@
-import type { Row } from "../layout";
+import type { ContentItem } from "../lib/types";
 import { TileItem } from "./TileItem";
 import "./TileRow.css";
 
 interface Props {
-  row: Row;
+  items: ContentItem[];
   focusedIndex: number | null;
-  scrolledOut?: boolean;
-  shiftUp?: boolean;
 }
 
-export function TileRow({
-  row,
-  focusedIndex,
-  scrolledOut = false,
-  shiftUp = false,
-}: Props) {
-  let className = "tile-row";
-  if (scrolledOut) className += " tile-row--scrolled-out";
-  else if (shiftUp) className += " tile-row--shift-up";
-
+export function TileRow({ items, focusedIndex }: Props) {
   return (
-    <div className={className}>
-      {row.items.map((item, i) => (
+    <div className="tile-row">
+      {items.map((item, i) => (
         <TileItem
-          key={item.label}
-          label={item.label}
-          img={item.img}
+          key={item.id}
+          label={item.title}
+          img={item.thumbnail}
           focused={focusedIndex === i}
         />
       ))}

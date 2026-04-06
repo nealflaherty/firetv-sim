@@ -1,42 +1,58 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { NAV_TOP, NAV_H, ALL_NAV, ROW_1, ROW_2 } from "../layout";
-import { HeroTrailer, type TrailerItem } from "../components/HeroTrailer";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { NAV_TOP, NAV_H, ALL_NAV } from "../layout";
+import { useHomeData } from "../lib/useHomeData";
+import { HeroTrailer } from "../components/HeroTrailer";
 import { NavBar } from "../components/NavBar";
 import { DetailPanel } from "../components/DetailPanel";
 import { TileRow } from "../components/TileRow";
 import "./HomePage.css";
 
-const TRAILERS: TrailerItem[] = [
-  {
-    videoSrc:
-      "https://abexlcnaaaaaaaamletu7vv43fzhj.mid-pop-vod-dash.main.amazon.pv-cdn.net/dm/3$0CiEIAhoFZW5fVVMgJTABUgaAwAKB8AN6A4C4F4IBAQGIAQQYAQ/iad_2/394d/7b22/7552/4d05-9f61-1e6826fd0b69/9297c5d3-d3f7-45a4-9918-77427ee09bc8_video_9.mp4?amznDtid=AOAGZA014O5RE&amznPN=xp&amznPV=ATVWebPlayerSDK-1.0.235484.0",
-  },
-  {
-    videoSrc:
-      "https://abexlcnaaaaaaaamlyjrns6ymqkdm.vod-dash.main.amazon.pv-cdn.net/dm/3$0CiEIAhoFZW5fR0IgHzABUgaAwAKB8AN6A4C4F4IBAQGIAQQYAQ/iad_2/91a0/e404/5db9/4796-a1fe-6901ea12d00f/a920aba9-ebf6-46c8-bc0d-3accf0055117_video_12.mp4?amznDtid=AOAGZA014O5RE&amznPN=xp&amznPV=ATVWebPlayerSDK-1.0.235614.0",
-  },
-  {
-    videoSrc:
-      "https://abexlcnaaaaaaaamlsbrxqnoa6uzl.vod-dash.main.amazon.pv-cdn.net/dm/3$0CiEIAhoFZW5fR0IgHzABUgaAwAKB8AN6A4C4F4IBAQGIAQQYAQ/iad_2/ff77/6225/383e/4650-900c-96656dd7d85e/caf5918f-e089-4b42-ab9f-997c4ce36707_video_9.mp4?amznDtid=AOAGZA014O5RE&amznPN=xp&amznPV=ATVWebPlayerSDK-1.0.235614.0",
-  },
-];
-
 const NAV_ROW = ALL_NAV.map((_item, i) => ({ id: `nav-${i}` }));
-const TILE_ROW_1 = ROW_1.items.map((_item, i) => ({ id: `r1-${i}` }));
-const TILE_ROW_2 = ROW_2.items.map((_item, i) => ({ id: `r2-${i}` }));
-
-const ROWS = [NAV_ROW, TILE_ROW_1, TILE_ROW_2];
 const INITIAL: [number, number] = [0, 4];
 
 export function HomePage() {
+  const { trailers, rows, thumbnails, loading } = useHomeData();
+
   const [pos, setPos] = useState(INITIAL);
   const [expanded, setExpanded] = useState(true);
   const expandedRef = useRef(true);
   const [trailerIndex, setTrailerIndex] = useState(0);
 
   const advanceTrailer = useCallback(() => {
-    setTrailerIndex((i) => (i + 1) % TRAILERS.length);
-  }, []);
+    setTrailerIndex((i) => (i + 1) % Math.max(1, trailers.length));
+  }, [trailers.length]);
+
+  // Build content rows with thumbnails merged in
+  const contentRows = useMemo(() => {
+    const result: {
+      id: string;
+      items: { id: string; title: string; thumbnail?: string }[];
+    }[] = [];
+    for (const [id, row] of rows) {
+      const thumbs = thumbnails.get(id) ?? {};
+      result.push({
+        id,
+        items: row.items.map((item) => ({
+          ...item,
+          thumbnail: thumbs[item.id] ?? item.thumbnail,
+        })),
+      });
+    }
+    return result;
+  }, [rows, thumbnails]);
+
+  // Navigation grid: nav row + content rows
+  const navRowItems = NAV_ROW;
+  const tileRowSizes = contentRows.map((r) => r.items.length);
+  const ROWS = useMemo(
+    () => [
+      navRowItems,
+      ...tileRowSizes.map((len) =>
+        Array.from({ length: len }, (_, i) => ({ id: `t-${i}` })),
+      ),
+    ],
+    [tileRowSizes],
+  );
 
   const [row, col] = pos;
 
@@ -70,12 +86,11 @@ export function HomePage() {
         return;
       }
 
-      // Left/right in expanded state controls the trailer carousel (wraps around)
       if (expandedRef.current) {
         if (key === "ArrowLeft") {
-          setTrailerIndex((i) => (i - 1 + TRAILERS.length) % TRAILERS.length);
+          setTrailerIndex((i) => (i - 1 + trailers.length) % trailers.length);
         } else if (key === "ArrowRight") {
-          setTrailerIndex((i) => (i + 1) % TRAILERS.length);
+          setTrailerIndex((i) => (i + 1) % trailers.length);
         }
         return;
       }
@@ -90,14 +105,16 @@ export function HomePage() {
 
     window.addEventListener("keydown", move);
     return () => window.removeEventListener("keydown", move);
-  }, []);
+  }, [ROWS, trailers.length]);
 
   const inContent = row >= 1;
-  const state = row === 0 ? "hero" : row === 1 ? "row1" : "row2";
-
+  const state = row === 0 ? "hero" : row >= 1 ? "content" : "hero";
   const shift = state === "hero" ? 0 : NAV_TOP;
-  const selectedLabel =
-    row === 1 ? ROW_1.items[col]?.label : ROW_2.items[col]?.label;
+
+  // Get the selected content item for the detail panel
+  const contentRowIndex = row - 1;
+  const selectedRow = contentRows[contentRowIndex];
+  const selectedItem = selectedRow?.items[col] ?? null;
 
   return (
     <div className="home-page">
@@ -106,12 +123,14 @@ export function HomePage() {
           className="content-layer"
           style={{ transform: `translateY(-${shift}%)` }}
         >
-          <HeroTrailer
-            expanded={expanded}
-            trailers={TRAILERS}
-            activeIndex={trailerIndex}
-            onAdvance={advanceTrailer}
-          />
+          {!loading.trailers && (
+            <HeroTrailer
+              expanded={expanded}
+              trailers={trailers}
+              activeIndex={trailerIndex}
+              onAdvance={advanceTrailer}
+            />
+          )}
 
           <div
             className="below-hero"
@@ -133,7 +152,7 @@ export function HomePage() {
                 </button>
                 <div className="carousel-controls__dots">
                   {[0, 1, 2].map((dot) => {
-                    const last = TRAILERS.length - 1;
+                    const last = Math.max(0, trailers.length - 1);
                     const activeDot =
                       trailerIndex === 0 ? 0 : trailerIndex >= last ? 2 : 1;
                     return (
@@ -149,23 +168,30 @@ export function HomePage() {
 
             <NavBar
               focusedIndex={row === 0 ? col : null}
-              showBreadcrumb={state === "row2"}
+              showBreadcrumb={row >= 2}
               translucent={expanded}
             />
 
             <div className="content-rows">
-              <DetailPanel title={selectedLabel ?? ""} visible={inContent} />
+              <DetailPanel item={selectedItem} visible={inContent} />
 
-              <TileRow
-                row={ROW_1}
-                focusedIndex={row === 1 ? col : null}
-                scrolledOut={row >= 2}
-              />
-              <TileRow
-                row={ROW_2}
-                focusedIndex={row === 2 ? col : null}
-                shiftUp={row >= 2}
-              />
+              <div
+                className="tile-scroll"
+                style={{
+                  transform:
+                    row >= 2
+                      ? `translateY(calc(-100% / ${contentRows.length} - 1vw))`
+                      : undefined,
+                }}
+              >
+                {contentRows.map((cr, i) => (
+                  <TileRow
+                    key={cr.id}
+                    items={cr.items}
+                    focusedIndex={row === i + 1 ? col : null}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>
