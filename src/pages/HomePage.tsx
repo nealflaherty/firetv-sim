@@ -7,6 +7,7 @@ import { HeroTrailer } from "../components/HeroTrailer";
 import { NavBar } from "../components/NavBar";
 import { DetailPanel } from "../components/DetailPanel";
 import { TileRow } from "../components/TileRow";
+import { FullscreenToggle } from "../components/FullscreenToggle";
 import "./HomePage.css";
 
 const HOME_NAV_INDEX = 4;
@@ -135,6 +136,7 @@ export function HomePage() {
 
   return (
     <div className="home-page">
+      <FullscreenToggle />
       <div className="viewport">
         {!loading.trailers && (
           <HeroTrailer
