@@ -27,48 +27,56 @@ export function DetailPanel({ item, visible }: Props) {
       className={`detail-panel-wrapper${visible ? " detail-panel-wrapper--open" : ""}`}
     >
       <div className="detail-panel">
-        {item && (
-          <>
-            <h1 className="detail-title">{item.title}</h1>
-            <div className="detail-meta">
-              {item.rating && (
-                <span className="detail-text">★ {item.rating}</span>
-              )}
-              {item.ratingCount != null && (
-                <span className="detail-text">
-                  ({formatCount(item.ratingCount)})
-                </span>
-              )}
-              {item.runtime != null && (
-                <span className="detail-text">
-                  {formatRuntime(item.runtime)}
-                </span>
-              )}
-              {item.year && <span className="detail-text">{item.year}</span>}
-              {item.maturity && (
-                <span className="detail-bordered">{item.maturity}</span>
-              )}
-              {item.features?.map((f) => (
-                <span key={f} className="detail-bordered">
-                  {f}
-                </span>
-              ))}
-            </div>
-            {item.description && (
-              <p className="detail-desc">{item.description}</p>
-            )}
-            {item.entitlement && (
-              <p className="detail-entitlement">
-                <img
-                  className="detail-entitlement__check"
-                  src="/fragments/blue_check.svg"
-                  alt=""
-                />
-                {item.entitlement}
-              </p>
-            )}
-          </>
+        {item?.thumbnail && (
+          <div
+            className="detail-panel__bg"
+            style={{ backgroundImage: `url(${item.thumbnail})` }}
+          />
         )}
+        <div className="detail-panel__content">
+          {item && (
+            <>
+              <h1 className="detail-title">{item.title}</h1>
+              <div className="detail-meta">
+                {item.rating && (
+                  <span className="detail-text">★ {item.rating}</span>
+                )}
+                {item.ratingCount != null && (
+                  <span className="detail-text">
+                    ({formatCount(item.ratingCount)})
+                  </span>
+                )}
+                {item.runtime != null && (
+                  <span className="detail-text">
+                    {formatRuntime(item.runtime)}
+                  </span>
+                )}
+                {item.year && <span className="detail-text">{item.year}</span>}
+                {item.maturity && (
+                  <span className="detail-bordered">{item.maturity}</span>
+                )}
+                {item.features?.map((f) => (
+                  <span key={f} className="detail-bordered">
+                    {f}
+                  </span>
+                ))}
+              </div>
+              {item.description && (
+                <p className="detail-desc">{item.description}</p>
+              )}
+              {item.entitlement && (
+                <p className="detail-entitlement">
+                  <img
+                    className="detail-entitlement__check"
+                    src="/fragments/blue_check.svg"
+                    alt=""
+                  />
+                  {item.entitlement}
+                </p>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
