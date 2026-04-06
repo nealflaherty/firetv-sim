@@ -190,6 +190,7 @@ export function HomePage() {
               {inContent && (
                 <motion.div
                   key="detail"
+                  className="detail-motion-wrapper"
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: "33vh", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
@@ -209,11 +210,16 @@ export function HomePage() {
               transition={transition}
             >
               {contentRows.map((cr, i) => (
-                <TileRow
+                <motion.div
                   key={cr.id}
-                  items={cr.items}
-                  focusedIndex={row === i + 1 ? col : null}
-                />
+                  animate={{ opacity: row >= 2 && i < row - 1 ? 0 : 1 }}
+                  transition={transition}
+                >
+                  <TileRow
+                    items={cr.items}
+                    focusedIndex={row === i + 1 ? col : null}
+                  />
+                </motion.div>
               ))}
             </motion.div>
           </div>

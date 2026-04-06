@@ -16,12 +16,16 @@
 /* Layer 1: radial glow behind everything */
 .nav-item__glow {
   position: absolute;
-  inset: -40%;
+  inset: -100%;
+  top: -140%;
   border-radius: 50%;
   background: radial-gradient(
-    circle at 50% 25%,
+    circle at 50% 40%,
     rgba(255, 255, 255, 0.45) 0%,
-    transparent 70%
+    rgba(255, 255, 255, 0.2) 15%,
+    rgba(255, 255, 255, 0.06) 30%,
+    rgba(255, 255, 255, 0.01) 40%,
+    transparent 50%
   );
   pointer-events: none;
 }
@@ -32,7 +36,7 @@
   width: 90%;
   aspect-ratio: 1;
   border-radius: 50%;
-  background: #0d0d0d;
+  background: #1a1a1a;
   pointer-events: none;
 }
 
