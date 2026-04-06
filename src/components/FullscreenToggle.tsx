@@ -1,16 +1,30 @@
 import { useCallback, useEffect, useState } from "react";
 import "./FullscreenToggle.css";
 
+const AUTO_HIDE_MS = 3000;
+
 export function FullscreenToggle() {
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isDark, setIsDark] = useState(true);
   const [visible, setVisible] = useState(true);
 
-  const toggle = useCallback(() => {
+  const toggleFullscreen = useCallback(() => {
     if (document.fullscreenElement) {
       document.exitFullscreen();
     } else {
       document.documentElement.requestFullscreen();
     }
+  }, []);
+
+  const toggleTheme = useCallback(() => {
+    setIsDark((d) => {
+      const next = !d;
+      document.documentElement.setAttribute(
+        "data-theme",
+        next ? "dark" : "light",
+      );
+      return next;
+    });
   }, []);
 
   useEffect(() => {
@@ -19,25 +33,27 @@ export function FullscreenToggle() {
     return () => document.removeEventListener("fullscreenchange", onChange);
   }, []);
 
-  // F key shortcut
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "f" || e.key === "F") {
         e.preventDefault();
-        toggle();
+        toggleFullscreen();
+      }
+      if (e.key === "t" || e.key === "T") {
+        e.preventDefault();
+        toggleTheme();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [toggle]);
+  }, [toggleFullscreen, toggleTheme]);
 
-  // Auto-hide after 3 seconds, show on mouse move
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
     const show = () => {
       setVisible(true);
       clearTimeout(timer);
-      timer = setTimeout(() => setVisible(false), 3000);
+      timer = setTimeout(() => setVisible(false), AUTO_HIDE_MS);
     };
     show();
     window.addEventListener("mousemove", show);
@@ -48,12 +64,21 @@ export function FullscreenToggle() {
   }, []);
 
   return (
-    <button
-      className={`fullscreen-toggle${visible ? "" : " fullscreen-toggle--hidden"}`}
-      onClick={toggle}
-      title={isFullscreen ? "Exit fullscreen (F)" : "Fullscreen (F)"}
-    >
-      {isFullscreen ? "⤓" : "⤢"}
-    </button>
+    <div className={`toolbar${visible ? "" : " toolbar--hidden"}`}>
+      <button
+        className="toolbar__btn"
+        onClick={toggleTheme}
+        title={`${isDark ? "Light" : "Dark"} theme (T)`}
+      >
+        {isDark ? "☀" : "☾"}
+      </button>
+      <button
+        className="toolbar__btn"
+        onClick={toggleFullscreen}
+        title={isFullscreen ? "Exit fullscreen (F)" : "Fullscreen (F)"}
+      >
+        {isFullscreen ? "⤓" : "⤢"}
+      </button>
+    </div>
   );
 }

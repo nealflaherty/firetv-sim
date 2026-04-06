@@ -28,10 +28,9 @@
   border-radius: 50%;
   background: radial-gradient(
     circle at 50% 45%,
-    rgba(255, 255, 255, 0.2) 0%,
-    rgba(255, 255, 255, 0.1) 15%,
-    rgba(255, 255, 255, 0.04) 30%,
-    rgba(255, 255, 255, 0.01) 40%,
+    var(--color-glow-soft) 0%,
+    rgba(255, 255, 255, 0.08) 15%,
+    rgba(255, 255, 255, 0.02) 30%,
     transparent 50%
   );
   pointer-events: none;
@@ -46,17 +45,17 @@
 /* Border with rotating highlight */
 .tile.focused .tile__inner {
   box-shadow:
-    0 1.5vw 3vw rgba(0, 0, 0, 1),
-    0 0.5vw 1vw rgba(0, 0, 0, 0.8);
+    0 1.5vw 3vw var(--color-shadow),
+    0 0.5vw 1vw var(--color-shadow-soft);
   border: none;
   padding: 4px;
   background: conic-gradient(
     from var(--highlight-angle, 0deg),
-    #888 0deg,
-    #888 280deg,
-    #fff 320deg,
-    #fff 340deg,
-    #888 360deg
+    var(--color-border) 0deg,
+    var(--color-border) 280deg,
+    var(--color-accent) 320deg,
+    var(--color-accent) 340deg,
+    var(--color-border) 360deg
   );
   animation: rotate-highlight 2.5s linear infinite;
 }
@@ -90,11 +89,11 @@
 .tile__placeholder {
   width: 100%;
   height: 100%;
-  background: #2a2a2a;
+  background: var(--color-surface);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #666;
+  color: var(--color-text-placeholder);
   font-size: 0.9vw;
   padding: 0.5vw;
   text-align: center;

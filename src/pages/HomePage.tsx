@@ -57,6 +57,8 @@ export function HomePage() {
     return generateContentForCategory(label);
   }, [pos, selectedNavIndex, homeContentRows]);
 
+  const activeNavIndex = pos[0] === 0 ? pos[1] : selectedNavIndex;
+
   // Navigation grid: nav row + content rows
   const ROWS = useMemo(
     () => [
@@ -118,9 +120,12 @@ export function HomePage() {
       }
 
       setPos(([r, c]) => {
-        if (key === "ArrowLeft") return [r, Math.max(0, c - 1)];
-        if (key === "ArrowRight")
+        if (key === "ArrowLeft") {
+          return [r, Math.max(0, c - 1)];
+        }
+        if (key === "ArrowRight") {
           return [r, Math.min(ROWS[r].length - 1, c + 1)];
+        }
         return [r, c];
       });
     };
@@ -181,8 +186,9 @@ export function HomePage() {
           </motion.div>
 
           <NavBar
-            focusedIndex={row === 0 ? col : null}
+            focusedIndex={expanded ? null : row === 0 ? col : selectedNavIndex}
             showBreadcrumb={row >= 2}
+            breadcrumbLabel={ALL_NAV[selectedNavIndex]?.label ?? ""}
             translucent={expanded}
           />
 
@@ -202,34 +208,47 @@ export function HomePage() {
               )}
             </AnimatePresence>
 
-            <motion.div
-              className="tile-scroll"
-              animate={{
-                y:
-                  row >= 2 ? `calc(-100% / ${contentRows.length} - 1vw)` : "0%",
-              }}
-              transition={transition}
-            >
-              {contentRows.map((cr, i) => {
-                const isFocusedRow = row === i + 1;
-                return (
-                  <motion.div
-                    key={cr.id}
-                    animate={{ opacity: row >= 2 && i < row - 1 ? 0 : 1 }}
-                    transition={transition}
-                    style={{
-                      position: "relative",
-                      zIndex: isFocusedRow ? 10 : 1,
-                    }}
-                  >
-                    <TileRow
-                      items={cr.items}
-                      focusedIndex={isFocusedRow ? col : null}
-                    />
-                  </motion.div>
-                );
-              })}
-            </motion.div>
+            <div style={{ position: "relative" }}>
+              <AnimatePresence initial={false}>
+                <motion.div
+                  key={activeNavIndex}
+                  className="tile-scroll"
+                  initial={{ opacity: 0 }}
+                  animate={{
+                    opacity: 1,
+                    y:
+                      row >= 2
+                        ? `calc(-100% / ${contentRows.length} - 1vw)`
+                        : "0%",
+                  }}
+                  exit={{ opacity: 0, position: "absolute" as const, inset: 0 }}
+                  transition={{
+                    opacity: { duration: 0.15, ease: [0.4, 0, 0.2, 1] },
+                    y: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
+                  }}
+                >
+                  {contentRows.map((cr, i) => {
+                    const isFocusedRow = row === i + 1;
+                    return (
+                      <motion.div
+                        key={cr.id}
+                        animate={{ opacity: row >= 2 && i < row - 1 ? 0 : 1 }}
+                        transition={transition}
+                        style={{
+                          position: "relative",
+                          zIndex: isFocusedRow ? 10 : 1,
+                        }}
+                      >
+                        <TileRow
+                          items={cr.items}
+                          focusedIndex={isFocusedRow ? col : null}
+                        />
+                      </motion.div>
+                    );
+                  })}
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </div>
         </motion.div>
       </div>

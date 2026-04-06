@@ -10,6 +10,7 @@ import "./NavBar.css";
 interface Props {
   focusedIndex: number | null;
   showBreadcrumb?: boolean;
+  breadcrumbLabel?: string;
   translucent?: boolean;
 }
 
@@ -21,6 +22,7 @@ const SETTINGS_INDEX = OVERFLOW_INDEX + 1;
 export function NavBar({
   focusedIndex,
   showBreadcrumb = false,
+  breadcrumbLabel = "",
   translucent = false,
 }: Props) {
   return (
@@ -72,11 +74,7 @@ export function NavBar({
       <div
         className={`nav-bar__breadcrumb${showBreadcrumb ? " nav-bar__breadcrumb--visible" : ""}`}
       >
-        <img
-          src="/fragments/Home_breadcrumb.svg"
-          alt="Home"
-          draggable={false}
-        />
+        <span className="nav-bar__breadcrumb-text">{breadcrumbLabel}</span>
       </div>
     </div>
   );

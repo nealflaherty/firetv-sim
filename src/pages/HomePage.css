@@ -46,7 +46,7 @@
   left: 0;
   width: 100%;
   height: 50%;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  background: linear-gradient(transparent, var(--color-overlay));
   pointer-events: none;
   transition: opacity 0.4s ease;
 }
@@ -81,8 +81,8 @@
 }
 
 .carousel-controls__learn-more {
-  background: #5a5a5a;
-  color: #c2c2c2;
+  background: var(--color-button-bg);
+  color: var(--color-button-text);
   border: none;
   border-radius: 999px;
   padding: 0.6vw 1.8vw;
@@ -95,8 +95,8 @@
 }
 
 .carousel-controls__learn-more--active {
-  background: #fff;
-  color: #000;
+  background: var(--color-accent);
+  color: var(--color-accent-inverse);
 }
 
 .carousel-controls__dots {
@@ -109,13 +109,13 @@
   width: 0.6vw;
   height: 0.6vw;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--color-dot);
 }
 
 .carousel-controls__dot--active {
   width: 1.4vw;
   border-radius: 0.3vw;
-  background: #fff;
+  background: var(--color-accent);
 }
 
 .detail-motion-wrapper {

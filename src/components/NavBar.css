@@ -1,10 +1,10 @@
 .nav-bar {
   position: relative;
   width: 100%;
-  height: min(8.889%, 5vw); /* NAV_H = 96/1080, capped to scale with width */
   background: var(--color-bg);
   flex-shrink: 0;
-  overflow: hidden;
+  padding: 0.8vw 0 1.5vw;
+  overflow-y: clip;
   transition: opacity 0.4s ease;
 }
 
@@ -14,8 +14,6 @@
 
 /* Nav items layer — fills the bar */
 .nav-bar__items {
-  position: absolute;
-  inset: 0;
   display: flex;
   align-items: center;
   padding: 0 var(--padding-edge);
@@ -44,18 +42,19 @@
   pointer-events: auto;
 }
 
-.nav-bar__breadcrumb img {
-  height: 2vw;
+.nav-bar__breadcrumb-text {
+  font-size: 1.2vw;
+  font-weight: bold;
+  color: var(--color-text);
 }
 
 .nav-bar__group {
   display: flex;
   align-items: center;
-  height: 100%;
 }
 
 .nav-bar__group--menu .nav-item {
-  height: 83.33%;
+  height: min(4vw, 6vh);
   aspect-ratio: 96 / 80;
 }
 
@@ -64,7 +63,7 @@
 }
 
 .nav-bar__group--apps .nav-item {
-  height: 83.33%;
+  height: min(4vw, 6vh);
   aspect-ratio: 144 / 80;
 }
 
@@ -78,6 +77,6 @@
 }
 
 .nav-bar__group--utils .nav-item {
-  height: 83.33%;
+  height: min(4vw, 6vh);
   aspect-ratio: 1 / 1;
 }

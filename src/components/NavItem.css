@@ -13,7 +13,36 @@
   z-index: 2;
 }
 
-/* Layer 1: radial glow behind everything */
+/* Shimmer sweep on focused app nav items only */
+.nav-item--app.nav-item--focused::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 0.4vw;
+  background: linear-gradient(
+    110deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.04) 45%,
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0.04) 55%,
+    transparent 65%
+  );
+  background-size: 300% 100%;
+  animation: nav-shimmer 7s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 5;
+}
+
+@keyframes nav-shimmer {
+  0% {
+    background-position: 300% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+/* Layer 1: radial glow — behind everything */
 .nav-item__glow {
   position: absolute;
   inset: -100%;
@@ -21,37 +50,44 @@
   border-radius: 50%;
   background: radial-gradient(
     circle at 50% 40%,
-    rgba(255, 255, 255, 0.45) 0%,
-    rgba(255, 255, 255, 0.2) 15%,
+    var(--color-glow) 0%,
+    var(--color-glow-soft) 15%,
     rgba(255, 255, 255, 0.06) 30%,
     rgba(255, 255, 255, 0.01) 40%,
     transparent 50%
   );
   pointer-events: none;
+  z-index: 1;
 }
 
-/* Layer 2: solid circle matching nav bar background */
+/* Layer 2: solid circle matching background */
 .nav-item__circle {
   position: absolute;
   width: 90%;
   aspect-ratio: 1;
-  border-radius: 50%;
-  background: #1a1a1a;
+  border-radius: 999px;
+  background: var(--color-bg);
   pointer-events: none;
+  z-index: 2;
 }
 
-/* Layer 3: the icon image */
+/* Layer 3: the icon image — always on top */
 .nav-item img {
   position: relative;
   width: 100%;
   height: 100%;
   object-fit: contain;
   display: block;
+  z-index: 3;
 }
 
-/* Brighten icon when focused — only for icon variant (SVG menu items) */
+/* Adjust SVG icon brightness per theme — only for icon variant */
+.nav-item--icon img {
+  filter: brightness(var(--nav-icon-brightness));
+}
+
 .nav-item--icon.nav-item--focused img {
-  filter: brightness(1.25);
+  filter: brightness(var(--nav-icon-brightness-active));
 }
 
 /* Label below */
@@ -60,7 +96,7 @@
   top: 105%;
   left: 50%;
   transform: translateX(-50%);
-  color: #fff;
+  color: var(--color-accent);
   font-size: 0.8vw;
   white-space: nowrap;
   text-align: center;

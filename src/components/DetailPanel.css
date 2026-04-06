@@ -45,7 +45,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  color: #fff;
+  color: var(--color-text);
 }
 
 .detail-title {
@@ -64,13 +64,13 @@
 
 .detail-text {
   font-size: 0.9vw;
-  color: #999;
+  color: var(--color-text-muted);
 }
 
 .detail-bordered {
   font-size: 0.8vw;
-  color: #999;
-  border: 1px solid #999;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-text-muted);
   border-radius: 0.2vw;
   padding: 0.1vw 0.4vw;
 }
@@ -78,12 +78,12 @@
 .detail-desc {
   margin: 0 0 0.4vw;
   font-size: 1vw;
-  color: #aaa;
+  color: var(--color-text-dim);
 }
 
 .detail-entitlement {
   font-size: 0.9vw;
-  color: #999;
+  color: var(--color-text-muted);
   font-weight: bold;
   display: flex;
   align-items: center;
