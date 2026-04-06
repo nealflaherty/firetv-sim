@@ -17,6 +17,7 @@ export interface ContentItem {
   features?: string[];
   entitlement?: string;
   thumbnail?: string; // populated in stage 3
+  gradient?: string; // gradient background for placeholder tiles
 }
 
 /** Stage 2: Row with content loaded */

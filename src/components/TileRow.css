@@ -1,15 +1,8 @@
-/* 
- * Tile scale overflow calculation:
- * Tile width ≈ (100% - 10.8% padding) / 5 ≈ 17.8vw
- * Tile height = width × (183/336) ≈ 9.7vw
- * Scale 1.3 overflow above = height × (1.3 - 1) / 2 ≈ 1.5vw
- * Total margin-top when focused = 1vw gap + 1.5vw overflow = 2.5vw
- */
 .tile-row {
-  padding-left: 5.417%; /* 104/1920 */
-  padding-right: 5.417%;
+  padding-left: var(--padding-edge);
+  padding-right: var(--padding-edge);
   display: flex;
-  gap: 0.417vw; /* 8/1920 */
+  gap: var(--tile-gap);
   flex-shrink: 0;
   margin-top: 2.5vw;
 }

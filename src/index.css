@@ -1,5 +1,15 @@
 @import url("https://fonts.cdnfonts.com/css/amazon-ember");
 
+:root {
+  --color-bg: #1a1a1a;
+  --color-text: #e0e0e0;
+  --color-text-muted: #999;
+  --padding-edge: 5.417%;
+  --tile-gap: 0.417vw;
+  --transition-duration: 0.6s;
+  --transition-ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -14,7 +24,7 @@ body {
     "Segoe UI",
     Roboto,
     sans-serif;
-  background: #0d0d1a;
+  background: var(--color-bg);
   color: #fff;
   -webkit-font-smoothing: antialiased;
 }

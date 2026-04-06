@@ -182,7 +182,6 @@ export function HomePage() {
 
           <NavBar
             focusedIndex={row === 0 ? col : null}
-            selectedIndex={selectedNavIndex}
             showBreadcrumb={row >= 2}
             translucent={expanded}
           />

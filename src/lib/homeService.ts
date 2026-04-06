@@ -10,7 +10,7 @@ export async function fetchTrailers(): Promise<Trailer[]> {
   return [
     {
       id: "t1",
-      title: "IQBAR",
+      title: "Nirvanna the Band the Show the Movie",
       videoSrc:
         "https://abexlcnaaaaaaaamletu7vv43fzhj.mid-pop-vod-dash.main.amazon.pv-cdn.net/dm/3$0CiEIAhoFZW5fVVMgJTABUgaAwAKB8AN6A4C4F4IBAQGIAQQYAQ/iad_2/394d/7b22/7552/4d05-9f61-1e6826fd0b69/9297c5d3-d3f7-45a4-9918-77427ee09bc8_video_9.mp4?amznDtid=AOAGZA014O5RE&amznPN=xp&amznPV=ATVWebPlayerSDK-1.0.235484.0",
     },

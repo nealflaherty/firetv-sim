@@ -643,8 +643,8 @@ export function generateContentForCategory(
         id: `${category}-${r}-${i}`,
         title: item.title,
         description: item.description,
-        _gradient: GRADIENTS[idx % GRADIENTS.length],
-      } as ContentItem & { _gradient: string };
+        gradient: GRADIENTS[idx % GRADIENTS.length],
+      };
     }),
   }));
 }
@@ -661,12 +661,8 @@ function generateFallbackRows(
         id: `${category}-${r}-${i}`,
         title: `${category} Item ${idx + 1}`,
         description: "Content coming soon.",
-        _gradient: GRADIENTS[idx % GRADIENTS.length],
-      } as ContentItem & { _gradient: string };
+        gradient: GRADIENTS[idx % GRADIENTS.length],
+      };
     }),
   }));
-}
-
-export function getGradient(item: ContentItem): string | undefined {
-  return (item as ContentItem & { _gradient?: string })._gradient;
 }

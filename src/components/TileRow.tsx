@@ -1,5 +1,4 @@
 import type { ContentItem } from "../lib/types";
-import { getGradient } from "../lib/placeholderContent";
 import { TileItem } from "./TileItem";
 import "./TileRow.css";
 
@@ -16,7 +15,7 @@ export function TileRow({ items, focusedIndex }: Props) {
           key={item.id}
           label={item.title}
           img={item.thumbnail}
-          gradient={getGradient(item)}
+          gradient={item.gradient}
           focused={focusedIndex === i}
         />
       ))}
