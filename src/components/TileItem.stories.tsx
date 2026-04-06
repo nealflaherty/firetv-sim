@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { TileItem } from "./TileItem";
-import { ROW_1, ROW_2 } from "../layout";
 
 const meta = {
   title: "Components/TileItem",
@@ -8,7 +7,14 @@ const meta = {
   parameters: { layout: "centered" },
   decorators: [
     (Story) => (
-      <div style={{ height: 180, display: "flex" }}>
+      <div
+        style={{
+          height: 180,
+          display: "flex",
+          background: "#1a1a1a",
+          padding: "2rem",
+        }}
+      >
         <Story />
       </div>
     ),
@@ -18,14 +24,36 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
-  args: { label: ROW_1.items[0].label, img: ROW_1.items[0].img },
+export const WithImage: Story = {
+  args: {
+    label: "Blaze and the Monster Machines",
+    img: "/fragments/Blaze_and_the_Monster_Machines.png",
+  },
 };
 
 export const Focused: Story = {
-  args: { label: ROW_1.items[0].label, img: ROW_1.items[0].img, focused: true },
+  args: {
+    label: "Blaze and the Monster Machines",
+    img: "/fragments/Blaze_and_the_Monster_Machines.png",
+    focused: true,
+  },
 };
 
-export const DreamScenario: Story = {
-  args: { label: ROW_2.items[0].label, img: ROW_2.items[0].img },
+export const WithGradient: Story = {
+  args: {
+    label: "Squid Game S2",
+    gradient: "linear-gradient(135deg, #667eea, #764ba2)",
+  },
+};
+
+export const GradientFocused: Story = {
+  args: {
+    label: "Squid Game S2",
+    gradient: "linear-gradient(135deg, #667eea, #764ba2)",
+    focused: true,
+  },
+};
+
+export const Placeholder: Story = {
+  args: { label: "Loading..." },
 };

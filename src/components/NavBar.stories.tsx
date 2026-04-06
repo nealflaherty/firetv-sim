@@ -11,8 +11,8 @@ const meta = {
         style={{
           position: "relative",
           width: "100%",
-          aspectRatio: "1920/1080",
-          background: "#1a1a2e",
+          height: "10vh",
+          background: "#1a1a1a",
         }}
       >
         <Story />
@@ -34,4 +34,12 @@ export const NetflixFocused: Story = {
 
 export const NoFocus: Story = {
   args: { focusedIndex: null },
+};
+
+export const Breadcrumb: Story = {
+  args: { focusedIndex: null, showBreadcrumb: true },
+};
+
+export const Translucent: Story = {
+  args: { focusedIndex: 4, translucent: true },
 };

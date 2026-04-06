@@ -1,5 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { HeroTrailer } from "./HeroTrailer";
+import type { Trailer } from "../lib/types";
+
+const sampleTrailers: Trailer[] = [
+  { id: "t1", title: "Trailer 1", videoSrc: "" },
+  { id: "t2", title: "Trailer 2", videoSrc: "" },
+  { id: "t3", title: "Trailer 3", videoSrc: "" },
+];
 
 const meta = {
   title: "Components/HeroTrailer",
@@ -11,7 +18,7 @@ const meta = {
         style={{
           position: "relative",
           width: "100%",
-          aspectRatio: "1920/1080",
+          height: "100vh",
           background: "#000",
         }}
       >
@@ -25,9 +32,17 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Expanded: Story = {
-  args: { expanded: true, videoSrc: "" },
+  args: { expanded: true, trailers: sampleTrailers, activeIndex: 0 },
 };
 
 export const Collapsed: Story = {
-  args: { expanded: false, videoSrc: "" },
+  args: { expanded: false, trailers: sampleTrailers, activeIndex: 0 },
+};
+
+export const SecondTrailer: Story = {
+  args: { expanded: true, trailers: sampleTrailers, activeIndex: 1 },
+};
+
+export const LastTrailer: Story = {
+  args: { expanded: true, trailers: sampleTrailers, activeIndex: 2 },
 };
