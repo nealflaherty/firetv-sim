@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { motion } from "framer-motion";
 import type { Trailer } from "../lib/types";
 import { HERO_H, HERO_CTA, NAV_H } from "../layout";
 import "./HeroTrailer.css";
@@ -8,6 +9,7 @@ interface Props {
   trailers: Trailer[];
   activeIndex: number;
   onAdvance?: () => void;
+  transition?: object;
 }
 
 export function HeroTrailer({
@@ -15,15 +17,17 @@ export function HeroTrailer({
   trailers,
   activeIndex,
   onAdvance,
+  transition,
 }: Props) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const current = trailers[activeIndex];
   if (!current) return null;
 
   return (
-    <div
+    <motion.div
       className={`hero${expanded ? " hero--expanded" : ""}`}
-      style={{ height: expanded ? "100%" : `${HERO_H + NAV_H}%` }}
+      animate={{ height: expanded ? "100%" : `${HERO_H + NAV_H}%` }}
+      transition={transition}
     >
       <video
         key={activeIndex}
@@ -47,6 +51,6 @@ export function HeroTrailer({
           }}
         />
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -2,14 +2,16 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { NAV_TOP, NAV_H, ALL_NAV } from "../layout";
 import { useHomeData } from "../lib/useHomeData";
+import { generateContentForCategory } from "../lib/placeholderContent";
 import { HeroTrailer } from "../components/HeroTrailer";
 import { NavBar } from "../components/NavBar";
 import { DetailPanel } from "../components/DetailPanel";
 import { TileRow } from "../components/TileRow";
 import "./HomePage.css";
 
+const HOME_NAV_INDEX = 4;
 const NAV_ROW = ALL_NAV.map((_item, i) => ({ id: `nav-${i}` }));
-const INITIAL: [number, number] = [0, 4];
+const INITIAL: [number, number] = [0, HOME_NAV_INDEX];
 
 const transition = { duration: 0.6, ease: [0.4, 0, 0.2, 1] as const };
 
@@ -20,12 +22,15 @@ export function HomePage() {
   const [expanded, setExpanded] = useState(true);
   const expandedRef = useRef(true);
   const [trailerIndex, setTrailerIndex] = useState(0);
+  // Remember which nav item is selected when navigating into content
+  const [selectedNavIndex, setSelectedNavIndex] = useState(HOME_NAV_INDEX);
 
   const advanceTrailer = useCallback(() => {
     setTrailerIndex((i) => (i + 1) % Math.max(1, trailers.length));
   }, [trailers.length]);
 
-  const contentRows = useMemo(() => {
+  // Build Home content rows with thumbnails merged in
+  const homeContentRows = useMemo(() => {
     const result: {
       id: string;
       items: { id: string; title: string; thumbnail?: string }[];
@@ -43,16 +48,23 @@ export function HomePage() {
     return result;
   }, [rows, thumbnails]);
 
-  const navRowItems = NAV_ROW;
-  const tileRowSizes = contentRows.map((r) => r.items.length);
+  // Get content rows for the active nav item — computed after pos destructuring
+  const contentRows = useMemo(() => {
+    const navIdx = pos[0] === 0 ? pos[1] : selectedNavIndex;
+    if (navIdx === HOME_NAV_INDEX) return homeContentRows;
+    const label = ALL_NAV[navIdx]?.label ?? "Unknown";
+    return generateContentForCategory(label);
+  }, [pos, selectedNavIndex, homeContentRows]);
+
+  // Navigation grid: nav row + content rows
   const ROWS = useMemo(
     () => [
-      navRowItems,
-      ...tileRowSizes.map((len) =>
-        Array.from({ length: len }, (_, i) => ({ id: `t-${i}` })),
+      NAV_ROW,
+      ...contentRows.map((r) =>
+        Array.from({ length: r.items.length }, (_, i) => ({ id: `t-${i}` })),
       ),
     ],
-    [tileRowSizes],
+    [contentRows],
   );
 
   const [row, col] = pos;
@@ -72,7 +84,9 @@ export function HomePage() {
             setExpanded(true);
             return [r, c];
           }
-          return [r - 1, r - 1 === 0 ? c : 0];
+          // Going back to nav — restore the remembered nav index
+          if (r === 1) return [0, selectedNavIndex];
+          return [r - 1, 0];
         });
         return;
       }
@@ -83,7 +97,14 @@ export function HomePage() {
           setExpanded(false);
           return;
         }
-        setPos(([r, c]) => (r < ROWS.length - 1 ? [r + 1, 0] : [r, c]));
+        setPos(([r, c]) => {
+          if (r === 0) {
+            // Remember which nav item we're leaving from
+            setSelectedNavIndex(c);
+            return [1, 0];
+          }
+          return r < ROWS.length - 1 ? [r + 1, 0] : [r, c];
+        });
         return;
       }
 
@@ -105,7 +126,7 @@ export function HomePage() {
 
     window.addEventListener("keydown", move);
     return () => window.removeEventListener("keydown", move);
-  }, [ROWS, trailers.length]);
+  }, [ROWS, trailers.length, selectedNavIndex]);
 
   const inContent = row >= 1;
   const contentRowIndex = row - 1;
@@ -121,6 +142,7 @@ export function HomePage() {
             trailers={trailers}
             activeIndex={trailerIndex}
             onAdvance={advanceTrailer}
+            transition={transition}
           />
         )}
 
@@ -158,6 +180,7 @@ export function HomePage() {
 
           <NavBar
             focusedIndex={row === 0 ? col : null}
+            selectedIndex={selectedNavIndex}
             showBreadcrumb={row >= 2}
             translucent={expanded}
           />

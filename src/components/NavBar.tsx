@@ -9,6 +9,7 @@ import "./NavBar.css";
 
 interface Props {
   focusedIndex: number | null;
+  selectedIndex?: number;
   showBreadcrumb?: boolean;
   translucent?: boolean;
 }
