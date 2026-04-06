@@ -9,10 +9,12 @@ const meta = {
     (Story) => (
       <div
         style={{
-          position: "relative",
           width: "100%",
-          height: "10vh",
+          height: "100vh",
           background: "#1a1a1a",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-end",
         }}
       >
         <Story />
