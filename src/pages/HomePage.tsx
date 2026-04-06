@@ -163,7 +163,7 @@ export function HomePage() {
               height: inContent
                 ? "0%"
                 : expanded
-                  ? "calc(100% - 7vw)"
+                  ? "calc(100% - 6vw)"
                   : `${NAV_TOP}%`,
             }}
             transition={transition}
