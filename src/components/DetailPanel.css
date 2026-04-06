@@ -1,11 +1,6 @@
 .detail-panel-wrapper {
   position: relative;
   z-index: 1;
-  height: 0;
-}
-
-.detail-panel-wrapper--open {
-  height: 33vh;
 }
 
 .detail-panel {
@@ -19,8 +14,6 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  opacity: 0;
-  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .detail-panel-wrapper--open .detail-panel {

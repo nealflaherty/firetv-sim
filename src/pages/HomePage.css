@@ -21,7 +21,6 @@
   position: absolute;
   inset: 0;
   z-index: 2;
-  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .below-hero {
@@ -30,7 +29,6 @@
   z-index: 4;
   display: flex;
   flex-direction: column;
-  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .below-hero__spacer {
@@ -39,6 +37,7 @@
   flex-direction: column;
   justify-content: flex-end;
   position: relative;
+  pointer-events: none;
 }
 
 .below-hero__spacer::after {
@@ -62,15 +61,15 @@
   flex-direction: column;
   flex: 1;
   background: #1a1a1a;
+  position: relative;
 }
 
 .tile-scroll {
   display: flex;
   flex-direction: column;
-  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Carousel controls — sits directly above the nav bar in the flow */
+/* Carousel controls */
 .carousel-controls {
   padding-left: 5.4%;
   padding-bottom: 1.2vw;
