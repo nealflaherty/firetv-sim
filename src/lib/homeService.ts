@@ -187,12 +187,11 @@ export async function fetchRowThumbnails(
       c5: F + "PAW_Patrol.png",
     },
     "row-2": {
-      c6: F + "Dream_Scenario.png",
-      c7:
-        F + "Weekend_Games_-_Jeopardy_Song_Quiz_CoComelon_formerly_Volley.png",
-      c8: F + "Tubi_Watch_Free_Movies_TV_Shows.png",
-      c9: F + "Bring_It_On.png",
-      c10: F + "Booty_Burn_Challenge.png",
+      c6: F + "Jury_Duty.png",
+      c7: F + "Here_Comes_Peter_Cottontail.png",
+      c8: F + "Car_City___Dino_Drives_.png",
+      c9: F + "Jesus_Christ_Superstar.png",
+      c10: F + "Fallout.png",
     },
     "row-3": {
       c11: F + "Dream_Scenario.png",
