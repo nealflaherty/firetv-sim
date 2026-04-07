@@ -51,6 +51,7 @@
   display: flex;
   flex-direction: column;
   flex: 1;
+  margin-top: -0.5vw;
 }
 
 .tile-scroll {
@@ -106,5 +107,27 @@
 .detail-motion-wrapper {
   position: relative;
   z-index: 2;
-  overflow: hidden;
+  overflow: visible;
+}
+
+.tile-section-title {
+  padding-left: var(--padding-edge);
+  padding-right: var(--padding-edge);
+  font-size: 1.4vw;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-top: 1vw;
+  margin-bottom: 0.5vw;
+  font-family: "Amazon Ember", sans-serif;
+  transform-origin: left center;
+  transition:
+    transform 0.3s ease,
+    margin-bottom 0.3s ease;
+  position: relative;
+  z-index: 5;
+}
+
+.tile-section-title--focused {
+  transform: scale(1.1) translateY(-0.3vw);
+  margin-bottom: 1.5vw;
 }

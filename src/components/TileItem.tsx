@@ -5,11 +5,18 @@ interface Props {
   img?: string;
   gradient?: string;
   focused?: boolean;
+  style?: React.CSSProperties;
 }
 
-export function TileItem({ label, img, gradient, focused = false }: Props) {
+export function TileItem({
+  label,
+  img,
+  gradient,
+  focused = false,
+  style,
+}: Props) {
   return (
-    <div className={`tile${focused ? " focused" : ""}`}>
+    <div className={`tile${focused ? " focused" : ""}`} style={style}>
       <div className="tile__inner">
         {img ? (
           <img src={img} alt={label} draggable={false} />

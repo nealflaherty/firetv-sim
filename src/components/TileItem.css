@@ -1,12 +1,14 @@
 .tile {
   position: relative;
-  flex: 1 1 0;
   min-width: 0;
   aspect-ratio: 336 / 183;
   border-radius: 0.4vw;
   overflow: visible;
   cursor: pointer;
-  transition: transform 0.3s ease;
+  transition:
+    flex-basis 0.3s ease,
+    margin 0.3s ease;
+  transform-origin: left center;
 }
 
 .tile__inner {
@@ -23,32 +25,31 @@
 .tile.focused::before {
   content: "";
   position: absolute;
-  inset: -80%;
-  top: -120%;
+  inset: -60%;
+  top: -80%;
   border-radius: 50%;
   background: radial-gradient(
-    circle at 50% 45%,
+    circle at 50% 50%,
     var(--color-glow-soft) 0%,
-    rgba(255, 255, 255, 0.08) 15%,
-    rgba(255, 255, 255, 0.02) 30%,
-    transparent 50%
+    rgba(255, 255, 255, 0.06) 15%,
+    rgba(255, 255, 255, 0.01) 30%,
+    transparent 45%
   );
   pointer-events: none;
   z-index: -1;
 }
 
 .tile.focused {
-  transform: scale(1.3);
   z-index: 2;
 }
 
 /* Border with rotating highlight */
 .tile.focused .tile__inner {
   box-shadow:
-    0 1.5vw 3vw var(--color-shadow),
-    0 0.5vw 1vw var(--color-shadow-soft);
+    0 0.5vw 1.2vw var(--color-shadow),
+    0 0.2vw 0.4vw var(--color-shadow-soft);
   border: none;
-  padding: 4px;
+  padding: 8px;
   background: conic-gradient(
     from var(--highlight-angle, 0deg),
     var(--color-border) 0deg,

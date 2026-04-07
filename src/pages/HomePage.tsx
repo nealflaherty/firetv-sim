@@ -44,12 +44,14 @@ export function HomePage() {
   const homeContentRows = useMemo(() => {
     const result: {
       id: string;
+      title?: string;
       items: { id: string; title: string; thumbnail?: string }[];
     }[] = [];
     for (const [id, row] of rows) {
       const thumbs = thumbnails.get(id) ?? {};
       result.push({
         id,
+        title: row.title,
         items: row.items.map((item) => ({
           ...item,
           thumbnail: thumbs[item.id] ?? item.thumbnail,
@@ -273,7 +275,7 @@ export function HomePage() {
                     opacity: 1,
                     y:
                       row >= 2
-                        ? `calc(-100% / ${contentRows.length} - 1vw)`
+                        ? `calc(${-(row - 1)} * (100% / ${contentRows.length} + 1vw))`
                         : "0%",
                   }}
                   exit={{ opacity: 0, position: "absolute" as const, inset: 0 }}
@@ -294,9 +296,17 @@ export function HomePage() {
                           zIndex: isFocusedRow ? 10 : 1,
                         }}
                       >
+                        {"title" in cr && cr.title && (
+                          <div
+                            className={`tile-section-title${isFocusedRow ? " tile-section-title--focused" : ""}`}
+                          >
+                            {cr.title}
+                          </div>
+                        )}
                         <TileRow
                           items={cr.items}
                           focusedIndex={isFocusedRow ? col : null}
+                          expanded={inContent}
                         />
                       </motion.div>
                     );
