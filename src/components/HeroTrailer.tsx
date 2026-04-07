@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { motion } from "framer-motion";
 import type { Trailer } from "../lib/types";
-import { HERO_H, HERO_CTA, NAV_H } from "../layout";
+import { HERO_CTA } from "../layout";
 import "./HeroTrailer.css";
 
 interface Props {
@@ -26,8 +26,9 @@ export function HeroTrailer({
   return (
     <motion.div
       className={`hero${expanded ? " hero--expanded" : ""}`}
-      animate={{ height: expanded ? "100%" : `${HERO_H + NAV_H}%` }}
+      animate={{ height: "100%", y: expanded ? "0%" : "-25%" }}
       transition={transition}
+      style={{ overflow: "hidden" }}
     >
       <video
         key={activeIndex}

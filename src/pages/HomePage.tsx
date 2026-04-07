@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { NAV_TOP, ALL_NAV } from "../layout";
+import { ALL_NAV } from "../layout";
 import { useHomeData } from "../lib/useHomeData";
 import { generateContentForCategory } from "../lib/placeholderContent";
 import { HeroTrailer } from "../components/HeroTrailer";
@@ -16,6 +16,16 @@ const INITIAL: [number, number] = [0, HOME_NAV_INDEX];
 
 const transition = { duration: 0.6, ease: [0.4, 0, 0.2, 1] as const };
 
+// Panel position: how far down from the top of the viewport
+// expanded: almost off-screen, just nav bar visible at bottom
+// compact: halfway, hero visible above
+// content: flush with top, fills the screen
+const PANEL_Y = {
+  expanded: "calc(100vh - 7vw)",
+  compact: "50vh",
+  content: "0vh",
+};
+
 export function HomePage() {
   const { trailers, rows, thumbnails, loading } = useHomeData();
 
@@ -23,14 +33,12 @@ export function HomePage() {
   const [expanded, setExpanded] = useState(true);
   const expandedRef = useRef(true);
   const [trailerIndex, setTrailerIndex] = useState(0);
-  // Remember which nav item is selected when navigating into content
   const [selectedNavIndex, setSelectedNavIndex] = useState(HOME_NAV_INDEX);
 
   const advanceTrailer = useCallback(() => {
     setTrailerIndex((i) => (i + 1) % Math.max(1, trailers.length));
   }, [trailers.length]);
 
-  // Build Home content rows with thumbnails merged in
   const homeContentRows = useMemo(() => {
     const result: {
       id: string;
@@ -49,7 +57,6 @@ export function HomePage() {
     return result;
   }, [rows, thumbnails]);
 
-  // Get content rows for the active nav item — computed after pos destructuring
   const contentRows = useMemo(() => {
     const navIdx = pos[0] === 0 ? pos[1] : selectedNavIndex;
     if (navIdx === HOME_NAV_INDEX) return homeContentRows;
@@ -59,7 +66,6 @@ export function HomePage() {
 
   const activeNavIndex = pos[0] === 0 ? pos[1] : selectedNavIndex;
 
-  // Navigation grid: nav row + content rows
   const ROWS = useMemo(
     () => [
       NAV_ROW,
@@ -87,7 +93,6 @@ export function HomePage() {
             setExpanded(true);
             return [r, c];
           }
-          // Going back to nav — restore the remembered nav index
           if (r === 1) return [0, selectedNavIndex];
           return [r - 1, 0];
         });
@@ -102,7 +107,6 @@ export function HomePage() {
         }
         setPos(([r, c]) => {
           if (r === 0) {
-            // Remember which nav item we're leaving from
             setSelectedNavIndex(c);
             return [1, 0];
           }
@@ -120,12 +124,9 @@ export function HomePage() {
       }
 
       setPos(([r, c]) => {
-        if (key === "ArrowLeft") {
-          return [r, Math.max(0, c - 1)];
-        }
-        if (key === "ArrowRight") {
+        if (key === "ArrowLeft") return [r, Math.max(0, c - 1)];
+        if (key === "ArrowRight")
           return [r, Math.min(ROWS[r].length - 1, c + 1)];
-        }
         return [r, c];
       });
     };
@@ -139,10 +140,18 @@ export function HomePage() {
   const selectedRow = contentRows[contentRowIndex];
   const selectedItem = selectedRow?.items[col] ?? null;
 
+  // Determine panel position
+  const panelY = expanded
+    ? PANEL_Y.expanded
+    : inContent
+      ? PANEL_Y.content
+      : PANEL_Y.compact;
+
   return (
     <div className="home-page">
       <FullscreenToggle />
       <div className="viewport">
+        {/* Hero trailer — always fills the viewport behind the panel */}
         {!loading.trailers && (
           <HeroTrailer
             expanded={expanded}
@@ -153,21 +162,19 @@ export function HomePage() {
           />
         )}
 
+        {/* Sliding panel — nav bar + content */}
         <motion.div
-          className={`below-hero${expanded ? " below-hero--expanded" : ""}`}
+          className="panel"
+          animate={{
+            y: panelY,
+            backgroundColor: expanded
+              ? "rgba(26, 26, 26, 0)"
+              : "rgba(26, 26, 26, 1)",
+          }}
           transition={transition}
         >
-          <motion.div
-            className={`below-hero__spacer${expanded ? " below-hero__spacer--expanded" : ""}`}
-            animate={{
-              height: inContent
-                ? "0%"
-                : expanded
-                  ? "calc(100% - 6vw)"
-                  : `${NAV_TOP}%`,
-            }}
-            transition={transition}
-          >
+          {/* Carousel controls — above the nav bar */}
+          <div className="panel__controls">
             <div className="carousel-controls">
               <button
                 className={`carousel-controls__learn-more${expanded ? " carousel-controls__learn-more--active" : ""}`}
@@ -188,8 +195,9 @@ export function HomePage() {
                 })}
               </div>
             </div>
-          </motion.div>
+          </div>
 
+          {/* Nav bar */}
           <NavBar
             focusedIndex={expanded ? null : row === 0 ? col : selectedNavIndex}
             showBreadcrumb={row >= 2}
@@ -197,15 +205,8 @@ export function HomePage() {
             translucent={expanded}
           />
 
-          <motion.div
-            className="content-rows"
-            animate={{
-              opacity: expanded ? 0 : 1,
-              height: expanded ? 0 : "auto",
-            }}
-            transition={transition}
-            style={{ overflow: "hidden" }}
-          >
+          {/* Content area — detail panel + tile rows */}
+          <div className="panel__content">
             <AnimatePresence initial={false}>
               {inContent && (
                 <motion.div
@@ -262,7 +263,7 @@ export function HomePage() {
                 </motion.div>
               </AnimatePresence>
             </div>
-          </motion.div>
+          </div>
         </motion.div>
       </div>
     </div>
