@@ -126,12 +126,12 @@ export function HomePage() {
       setPos(([r, c]) => {
         if (key === "ArrowLeft") {
           const next = Math.max(0, c - 1);
-          if (r === 0) setSelectedNavIndex(next);
+          if (r === 0 && next !== c) setSelectedNavIndex(next);
           return [r, next];
         }
         if (key === "ArrowRight") {
           const next = Math.min(ROWS[r].length - 1, c + 1);
-          if (r === 0) setSelectedNavIndex(next);
+          if (r === 0 && next !== c) setSelectedNavIndex(next);
           return [r, next];
         }
         return [r, c];
@@ -170,15 +170,16 @@ export function HomePage() {
         )}
 
         {/* Sliding panel — nav bar + content */}
-        <motion.div
+        <div
           className="panel"
-          animate={{
-            y: panelY,
+          style={{
+            transform: `translateY(${panelY})`,
             backgroundColor: expanded
               ? "rgba(26, 26, 26, 0)"
               : "rgba(26, 26, 26, 1)",
+            transition:
+              "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
           }}
-          transition={transition}
         >
           {/* Carousel controls — above the nav bar */}
           <div className="panel__controls">
@@ -272,7 +273,7 @@ export function HomePage() {
               </AnimatePresence>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

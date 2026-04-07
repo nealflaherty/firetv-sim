@@ -9,8 +9,6 @@ interface Props {
   variant?: "icon" | "app";
 }
 
-const glowTransition = { duration: 0.08, ease: [0.4, 0, 0.2, 1] as const };
-
 export function NavItem({
   label,
   img,
@@ -18,28 +16,14 @@ export function NavItem({
   selected = false,
   variant = "icon",
 }: Props) {
-  const isActive = focused || selected;
+  const showCircle = (focused || selected) && variant === "icon";
 
   return (
     <div
       className={`nav-item nav-item--${variant}${focused ? " nav-item--focused" : ""}${selected ? " nav-item--selected" : ""}`}
     >
-      {/* Glow only when actively focused, not just selected */}
-      {focused && (
-        <motion.div
-          className="nav-item__glow"
-          layoutId="nav-glow"
-          transition={{ layout: glowTransition }}
-        />
-      )}
-      {/* Circle shows for both focused and selected icon variants */}
-      {isActive && variant === "icon" && (
-        <motion.div
-          className="nav-item__circle"
-          layoutId="nav-circle"
-          transition={{ layout: glowTransition }}
-        />
-      )}
+      {focused && <div className="nav-item__glow" />}
+      {showCircle && <div className="nav-item__circle" />}
       <img src={img} alt={label} draggable={false} />
       <AnimatePresence>
         {focused && (
