@@ -124,9 +124,16 @@ export function HomePage() {
       }
 
       setPos(([r, c]) => {
-        if (key === "ArrowLeft") return [r, Math.max(0, c - 1)];
-        if (key === "ArrowRight")
-          return [r, Math.min(ROWS[r].length - 1, c + 1)];
+        if (key === "ArrowLeft") {
+          const next = Math.max(0, c - 1);
+          if (r === 0) setSelectedNavIndex(next);
+          return [r, next];
+        }
+        if (key === "ArrowRight") {
+          const next = Math.min(ROWS[r].length - 1, c + 1);
+          if (r === 0) setSelectedNavIndex(next);
+          return [r, next];
+        }
         return [r, c];
       });
     };
@@ -199,10 +206,11 @@ export function HomePage() {
 
           {/* Nav bar */}
           <NavBar
-            focusedIndex={expanded ? null : row === 0 ? col : selectedNavIndex}
+            focusedIndex={row === 0 ? col : null}
+            selectedIndex={selectedNavIndex}
             showBreadcrumb={row >= 2}
             breadcrumbLabel={ALL_NAV[selectedNavIndex]?.label ?? ""}
-            translucent={expanded}
+            mode={expanded ? "expanded" : inContent ? "content" : "compact"}
           />
 
           {/* Content area — detail panel + tile rows */}

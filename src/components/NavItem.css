@@ -9,8 +9,14 @@
   transition: transform 0.1s ease;
 }
 
-/* Focused state */
+/* Focused state — actively navigating the nav bar */
 .nav-item--focused {
+  z-index: 2;
+  transform: scale(1.2);
+}
+
+/* Selected state — showing which section you're in while browsing content */
+.nav-item--selected {
   z-index: 2;
   transform: scale(1.2);
 }
@@ -70,7 +76,7 @@
 /* Layer 2: solid circle matching background */
 .nav-item__circle {
   position: absolute;
-  width: 90%;
+  width: 75%;
   aspect-ratio: 1;
   border-radius: 999px;
   background: var(--color-bg);
@@ -93,7 +99,8 @@
   filter: brightness(var(--nav-icon-brightness));
 }
 
-.nav-item--icon.nav-item--focused img {
+.nav-item--icon.nav-item--focused img,
+.nav-item--icon.nav-item--selected img {
   filter: brightness(var(--nav-icon-brightness-active));
 }
 
@@ -104,7 +111,8 @@
   left: 50%;
   transform: translateX(-50%);
   color: var(--color-accent);
-  font-size: 0.8vw;
+  font-size: 1vw;
+  font-weight: 700;
   white-space: nowrap;
   text-align: center;
   pointer-events: none;

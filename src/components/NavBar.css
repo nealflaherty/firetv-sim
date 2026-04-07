@@ -8,16 +8,33 @@
   transition: opacity 0.4s ease;
 }
 
-.nav-bar--translucent {
+.nav-bar--expanded {
   opacity: 0.3;
 }
 
-/* Nav items layer — fills the bar */
+.nav-bar--expanded .nav-bar__items {
+  background: rgba(42, 42, 42, 0.3);
+}
+
+.nav-bar--compact .nav-bar__items {
+  background: transparent;
+}
+
+/* Nav items layer */
 .nav-bar__items {
   display: flex;
   align-items: center;
-  padding: 0 var(--padding-edge);
-  transition: opacity 0.4s ease;
+  padding: 0.4vw 1vw;
+  margin: 0 var(--padding-edge);
+  border-radius: 999px;
+  background: #2a2a2a;
+  transition:
+    opacity 0.4s ease,
+    background 0.4s ease;
+}
+
+.nav-bar--translucent .nav-bar__items {
+  background: rgba(42, 42, 42, 0.3);
 }
 
 .nav-bar__items--hidden {
