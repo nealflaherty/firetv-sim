@@ -50,8 +50,8 @@ interface EnrichedItem {
   images?: { packshot?: string; hero?: string; covershot?: string };
   entitlementCues?: {
     entitlementType?: string;
-    focusMessage?: string;
-    highValueMessage?: string;
+    focusMessage?: string | { icon?: string; message?: string };
+    highValueMessage?: string | { icon?: string; message?: string };
   };
   trailer?: {
     correlationId?: string;
@@ -237,21 +237,41 @@ function findJsonBlobs(text: string): string[] {
 function parseDomCarousels(doc: Document): AmazonWidget[] {
   const widgets: AmazonWidget[] = [];
 
-  // Look for common carousel/row patterns in Amazon Video pages
-  // Try various selectors that Amazon uses for content rows
+  // Strategy A: Use the known Amazon structure — <section data-testid="standard-carousel">
+  // contains <article data-card-title="..."> cards
+  const carouselSections = doc.querySelectorAll(
+    'section[data-testid="standard-carousel"]',
+  );
+  if (carouselSections.length > 0) {
+    for (const section of carouselSections) {
+      const items = extractCardsFromContainer(section);
+      if (items.length >= 1) {
+        // Title is in <h2> inside the section header
+        const heading =
+          section.querySelector("h2")?.textContent?.trim() ??
+          section
+            .querySelector('[data-testid="carousel-title"]')
+            ?.textContent?.trim();
+        widgets.push({
+          widgetId: section.getAttribute("data-testid") ?? undefined,
+          title: heading ?? "Untitled Row",
+          items,
+        });
+      }
+    }
+    return deduplicateWidgets(widgets);
+  }
+
+  // Strategy B: Fallback to generic selectors
   const selectors = [
-    // Carousel containers
     '[class*="carousel"]',
     '[class*="Carousel"]',
     '[class*="slider"]',
     '[class*="Slider"]',
-    // Content row sections
     '[class*="content-row"]',
     '[class*="ContentRow"]',
-    // Card grids
     '[class*="card-grid"]',
     '[class*="CardGrid"]',
-    // Amazon-specific patterns
     '[data-testid*="carousel"]',
     '[data-testid*="row"]',
     '[data-automation-id*="carousel"]',
@@ -309,13 +329,14 @@ function parseDomCarousels(doc: Document): AmazonWidget[] {
       if (imgUrl && (imgUrl.includes("1x1") || imgUrl.includes("pixel")))
         continue;
 
-      // Find title text — try multiple strategies
+      // Find title text — try data-card-title, aria-label, link text
+      const article = link.closest("article[data-card-title]");
+      const btn = link.parentElement?.querySelector("button[aria-label]");
       const title =
+        article?.getAttribute("data-card-title") ??
+        btn?.getAttribute("aria-label") ??
         link.getAttribute("aria-label") ??
         img?.getAttribute("alt") ??
-        link
-          .querySelector('[class*="title"], [class*="Title"], h3, h4, span')
-          ?.textContent?.trim() ??
         link.textContent?.trim();
 
       // Deduplicate: only keep the first (usually best) link per titleID per parent
@@ -385,16 +406,93 @@ function parseDomCarousels(doc: Document): AmazonWidget[] {
     }
   }
 
-  return widgets;
+  // Deduplicate sections with overlapping items
+  return deduplicateWidgets(widgets);
+}
+
+/**
+ * Remove duplicate/overlapping sections.
+ * Two sections are considered duplicates if they share the same title
+ * and >50% of their titleIDs overlap. Keep the one with more items.
+ */
+function deduplicateWidgets(widgets: AmazonWidget[]): AmazonWidget[] {
+  const result: AmazonWidget[] = [];
+
+  for (const w of widgets) {
+    const wIds = new Set((w.items ?? []).map((i) => i.titleID).filter(Boolean));
+    if (wIds.size === 0) continue;
+
+    // Check if this overlaps significantly with an existing section
+    let merged = false;
+    for (let i = 0; i < result.length; i++) {
+      const existing = result[i];
+      const eIds = new Set(
+        (existing.items ?? []).map((i) => i.titleID).filter(Boolean),
+      );
+
+      // Count overlap
+      let overlap = 0;
+      for (const id of wIds) {
+        if (eIds.has(id)) overlap++;
+      }
+
+      const smaller = Math.min(wIds.size, eIds.size);
+      if (smaller > 0 && overlap / smaller > 0.5) {
+        // Keep the one with more items
+        if ((w.items?.length ?? 0) > (existing.items?.length ?? 0)) {
+          result[i] = w;
+        }
+        merged = true;
+        break;
+      }
+    }
+
+    if (!merged) {
+      result.push(w);
+    }
+  }
+
+  return result;
 }
 
 function extractCardsFromContainer(container: Element): AmazonWidgetItem[] {
   const items: AmazonWidgetItem[] = [];
   const seenIds = new Set<string>();
 
-  // Look for card-like children with images and links
+  // Amazon uses <article data-card-title="..."> for each card
+  const articleCards = container.querySelectorAll("article[data-card-title]");
+  if (articleCards.length > 0) {
+    for (const article of articleCards) {
+      const link = article.querySelector(
+        'a[href*="/dp/"], a[href*="/detail/"]',
+      );
+      const href = link?.getAttribute("href") ?? "";
+      const titleID =
+        href.match(/\/dp\/([A-Z0-9]{10})/)?.[1] ??
+        href.match(/\/detail\/([A-Z0-9]{10,30})/)?.[1] ??
+        href.match(/\/gp\/video\/detail\/([A-Z0-9]{10,30})/)?.[1];
+
+      if (titleID && seenIds.has(titleID)) continue;
+      if (titleID) seenIds.add(titleID);
+
+      const title = article.getAttribute("data-card-title") ?? undefined;
+      const img = article.querySelector("img");
+      const imgUrl = img?.getAttribute("src") ?? undefined;
+
+      if (title || titleID) {
+        items.push({
+          titleID,
+          title,
+          image: imgUrl ? { url: imgUrl } : undefined,
+        });
+      }
+    }
+    return items;
+  }
+
+  // Fallback: look for links with /dp/ or /detail/
   const cards = container.querySelectorAll(
-    'a[href*="/dp/"], a[href*="/detail/"], [class*="card"], [class*="Card"], [class*="tile"], [class*="Tile"]',
+    'a[href*="/dp/"], a[href*="/detail/"]',
   );
 
   for (const card of cards) {
@@ -405,25 +503,22 @@ function extractCardsFromContainer(container: Element): AmazonWidgetItem[] {
       href.match(/\/detail\/([A-Z0-9]{10,30})/)?.[1] ??
       href.match(/\/gp\/video\/detail\/([A-Z0-9]{10,30})/)?.[1];
 
-    // Deduplicate by titleID
     if (titleID && seenIds.has(titleID)) continue;
     if (titleID) seenIds.add(titleID);
 
     const img = card.querySelector("img");
     const imgUrl = img?.getAttribute("src") ?? undefined;
-
-    // Skip tracking pixels
     if (imgUrl && (imgUrl.includes("1x1") || imgUrl.includes("pixel")))
       continue;
 
-    // Try multiple strategies for title text
+    // Try to find title from nearby article or button
+    const article = card.closest("article[data-card-title]");
+    const btn = card.parentElement?.querySelector("button[aria-label]");
     const title =
+      article?.getAttribute("data-card-title") ??
+      btn?.getAttribute("aria-label") ??
       card.getAttribute("aria-label") ??
       link?.getAttribute("aria-label") ??
-      img?.getAttribute("alt") ??
-      card
-        .querySelector('[class*="title"], [class*="Title"], h3, h4, span')
-        ?.textContent?.trim() ??
       link?.textContent?.trim();
 
     if (title || titleID) {
@@ -596,6 +691,58 @@ interface EnrichRequest {
   marketplaceId?: string;
 }
 
+/**
+ * Fetch titles for a batch of ASINs by loading their /dp/ pages
+ * and extracting the title from the HTML <title> tag.
+ * Returns a map of ASIN → title.
+ */
+export async function fetchTitlesForAsins(
+  asins: string[],
+): Promise<Map<string, string>> {
+  const titles = new Map<string, string>();
+
+  // Fetch in parallel, max 5 concurrent
+  const CONCURRENCY = 5;
+  const queue = [...asins];
+
+  async function worker() {
+    while (queue.length > 0) {
+      const asin = queue.shift();
+      if (!asin) break;
+      try {
+        const resp = await fetch(`${AMAZON_ORIGIN}/dp/${asin}`, {
+          credentials: "include",
+          headers: {
+            Accept: "text/html",
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        });
+        if (!resp.ok) continue;
+        // Only read first chunk for the <title> tag
+        const text = await resp.text();
+        const match = text.match(/<title[^>]*>([^<]+)<\/title>/i);
+        if (match) {
+          // Amazon titles are like "Watch Title | Prime Video"
+          let title = match[1].trim();
+          // Strip common suffixes
+          title = title
+            .replace(/\s*\|\s*Prime Video.*$/i, "")
+            .replace(/\s*-\s*Amazon\.com.*$/i, "")
+            .replace(/^Amazon\.com:\s*/i, "")
+            .replace(/^Watch\s+/i, "")
+            .trim();
+          if (title) titles.set(asin, title);
+        }
+      } catch {
+        /* skip */
+      }
+    }
+  }
+
+  await Promise.all(Array.from({ length: CONCURRENCY }, () => worker()));
+  return titles;
+}
+
 export async function enrichItemMetadata(
   req: EnrichRequest,
 ): Promise<EnrichedItem[]> {
@@ -700,10 +847,16 @@ function mapWidgetItem(
   raw: AmazonWidgetItem,
   enriched?: EnrichedItem,
 ): ContentItem {
-  const entitlementMsg =
-    enriched?.entitlementCues?.focusMessage ??
-    enriched?.entitlementCues?.highValueMessage ??
-    enriched?.entitlementCues?.entitlementType;
+  const cues = enriched?.entitlementCues;
+  const focusMsg =
+    typeof cues?.focusMessage === "string"
+      ? cues.focusMessage
+      : cues?.focusMessage?.message;
+  const highMsg =
+    typeof cues?.highValueMessage === "string"
+      ? cues.highValueMessage
+      : cues?.highValueMessage?.message;
+  const entitlementMsg = focusMsg ?? highMsg ?? cues?.entitlementType;
 
   // Title: prefer widget item title, fall back to enriched title
   const title = raw.title || enriched?.title || "Untitled";
@@ -788,30 +941,53 @@ export async function inspectAsinInDom(asin: string): Promise<unknown> {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, "text/html");
 
-  // Find the first link containing this ASIN
-  const link = doc.querySelector(`a[href*="${asin}"]`);
-  if (!link) return { error: `No link found for ${asin}` };
+  // If asin is empty, just find the first /dp/ link
+  const selector = asin ? `a[href*="${asin}"]` : 'a[href*="/dp/"]';
+  const links = doc.querySelectorAll(selector);
+  if (links.length === 0)
+    return { error: `No link found for ${asin || "/dp/"}` };
 
-  // Walk up the ancestor chain and describe each level
-  const ancestors: unknown[] = [];
-  let el: Element | null = link;
-  for (let i = 0; i < 8 && el; i++) {
-    const attrs: Record<string, string> = {};
-    for (const attr of el.attributes) {
-      attrs[attr.name] = attr.value.slice(0, 300);
+  const results: unknown[] = [];
+  for (const link of links) {
+    const ancestors: unknown[] = [];
+    let el: Element | null = link;
+    for (let i = 0; i < 8 && el; i++) {
+      const attrs: Record<string, string> = {};
+      for (const attr of el.attributes) {
+        attrs[attr.name] = attr.value.slice(0, 300);
+      }
+      let directText = "";
+      for (const node of el.childNodes) {
+        if (node.nodeType === 3) {
+          const t = node.textContent?.trim();
+          if (t) directText += t + " ";
+        }
+      }
+      ancestors.push({
+        depth: i,
+        tag: el.tagName.toLowerCase(),
+        attrs,
+        childCount: el.children.length,
+        directText: directText.trim().slice(0, 200) || undefined,
+        fullText: el.textContent?.trim().slice(0, 300) ?? "",
+        outerSnippet: el.outerHTML.slice(0, 800),
+      });
+      el = el.parentElement;
     }
-    ancestors.push({
-      depth: i,
-      tag: el.tagName.toLowerCase(),
-      attrs,
-      childCount: el.children.length,
-      textSnippet: el.textContent?.trim().slice(0, 200) ?? "",
-      outerSnippet: el.outerHTML.slice(0, 500),
+    results.push({
+      linkHref: link.getAttribute("href"),
+      linkAriaLabel: link.getAttribute("aria-label"),
+      imgAlt: link.querySelector("img")?.getAttribute("alt"),
+      ancestors,
     });
-    el = el.parentElement;
+    if (results.length >= 3) break;
   }
 
-  return { asin, linkHref: link.getAttribute("href"), ancestors };
+  return {
+    asin: asin || "(first /dp/ link)",
+    linkCount: links.length,
+    links: results,
+  };
 }
 
 /**

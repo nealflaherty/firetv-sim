@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ALL_NAV } from "../layout";
 import { useHomeData } from "../lib/useHomeData";
+import { useAmazonData } from "../lib/useAmazonData";
 import { generateContentForCategory } from "../lib/placeholderContent";
 import { HeroTrailer } from "../components/HeroTrailer";
 import { NavBar } from "../components/NavBar";
@@ -28,6 +29,7 @@ const PANEL_Y = {
 
 export function HomePage() {
   const { trailers, rows, thumbnails, loading } = useHomeData();
+  const { rows: amazonRows } = useAmazonData();
 
   const [pos, setPos] = useState(INITIAL);
   const [expanded, setExpanded] = useState(true);
@@ -61,8 +63,12 @@ export function HomePage() {
     const navIdx = pos[0] === 0 ? pos[1] : selectedNavIndex;
     if (navIdx === HOME_NAV_INDEX) return homeContentRows;
     const label = ALL_NAV[navIdx]?.label ?? "Unknown";
+    // Use real Amazon data for Prime Video when available
+    if (label === "Prime Video" && amazonRows.length > 0) {
+      return amazonRows;
+    }
     return generateContentForCategory(label);
-  }, [pos, selectedNavIndex, homeContentRows]);
+  }, [pos, selectedNavIndex, homeContentRows, amazonRows]);
 
   const activeNavIndex = pos[0] === 0 ? pos[1] : selectedNavIndex;
 

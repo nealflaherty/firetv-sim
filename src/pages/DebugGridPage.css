@@ -1,0 +1,141 @@
+.debug-grid-page {
+  background: #0d1117;
+  color: #c9d1d9;
+  min-height: 100vh;
+  padding: 1rem 1.5rem;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+}
+
+.debug-grid-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.debug-grid-header h1 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #e6edf3;
+}
+
+.debug-grid-back {
+  color: #58a6ff;
+  text-decoration: none;
+  font-size: 0.8rem;
+}
+
+.debug-grid-status {
+  color: #8b949e;
+  font-size: 0.8rem;
+  margin-left: auto;
+}
+
+.debug-grid-reload {
+  background: #21262d;
+  color: #c9d1d9;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.debug-grid-reload:hover {
+  background: #30363d;
+}
+
+.debug-grid-empty {
+  color: #484f58;
+  text-align: center;
+  padding: 4rem;
+}
+
+.debug-grid-section {
+  margin-bottom: 2rem;
+}
+
+.debug-grid-section-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #e6edf3;
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.debug-grid-section-count {
+  background: #21262d;
+  color: #8b949e;
+  font-size: 0.65rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  font-weight: 400;
+}
+
+.debug-grid-row {
+  display: flex;
+  gap: 0.6rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.debug-grid-card {
+  flex: 0 0 200px;
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.debug-grid-card-img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+  background: #21262d;
+}
+
+.debug-grid-card-placeholder {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(135deg, #21262d, #30363d);
+}
+
+.debug-grid-card-info {
+  padding: 0.4rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.debug-grid-card-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #e6edf3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.debug-grid-card-meta {
+  font-size: 0.65rem;
+  color: #58a6ff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.debug-grid-card-entitlement {
+  font-size: 0.65rem;
+  color: #8b949e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
