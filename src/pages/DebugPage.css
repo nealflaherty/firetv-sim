@@ -1,0 +1,169 @@
+.debug-page {
+  background: #0d1117;
+  color: #c9d1d9;
+  min-height: 100vh;
+  padding: 1.5rem;
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 13px;
+}
+
+.debug-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.debug-header h1 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #e6edf3;
+}
+
+.debug-back {
+  color: #58a6ff;
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.debug-back:hover {
+  text-decoration: underline;
+}
+
+.debug-badge {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: #30363d;
+  color: #8b949e;
+}
+
+.debug-badge--on {
+  background: #1f6feb33;
+  color: #58a6ff;
+}
+
+.debug-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.debug-controls button {
+  background: #21262d;
+  color: #c9d1d9;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.debug-controls button:hover:not(:disabled) {
+  background: #30363d;
+}
+
+.debug-controls button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.debug-enrich-group {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.debug-enrich-group input {
+  background: #0d1117;
+  color: #c9d1d9;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.8rem;
+  width: 320px;
+  font-family: inherit;
+}
+
+.debug-enrich-group input::placeholder {
+  color: #484f58;
+}
+
+.debug-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  height: calc(100vh - 10rem);
+}
+
+.debug-panel {
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.debug-panel h2 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid #21262d;
+  color: #8b949e;
+}
+
+.debug-log {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.debug-log-entry {
+  padding: 0.3rem 0;
+  border-bottom: 1px solid #21262d22;
+  display: flex;
+  gap: 0.3rem;
+}
+
+.debug-log-entry--clickable {
+  cursor: pointer;
+}
+
+.debug-log-entry--clickable:hover {
+  background: #21262d;
+}
+
+.debug-log-expand {
+  color: #58a6ff;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.debug-log-time {
+  color: #484f58;
+  margin-right: 0.5rem;
+}
+
+.debug-log-msg {
+  color: #c9d1d9;
+}
+
+.debug-empty {
+  color: #484f58;
+  padding: 1rem;
+  text-align: center;
+}
+
+.debug-json {
+  flex: 1;
+  overflow: auto;
+  padding: 0.8rem;
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: #8b949e;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
