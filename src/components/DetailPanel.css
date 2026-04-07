@@ -35,17 +35,22 @@
   pointer-events: none;
 }
 
-/* Text content — left half only */
+/* Text content — fixed slot layout */
 .detail-panel__content {
   position: relative;
   z-index: 1;
   width: 50%;
   height: 100%;
   padding-left: var(--padding-edge);
+  padding-top: 2vw;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  gap: 0.4vw;
   color: var(--color-text);
+}
+
+/* Slot 1: Title — pinned to top */
+.detail-slot--title {
 }
 
 .detail-title {
@@ -55,11 +60,14 @@
   color: var(--color-text);
 }
 
+/* Slot 2: Rating/metadata row */
+.detail-slot--meta {
+}
+
 .detail-meta {
   display: flex;
   align-items: center;
   gap: 0.8vw;
-  margin-bottom: 0.6vw;
 }
 
 .detail-text {
@@ -75,10 +83,18 @@
   padding: 0.1vw 0.4vw;
 }
 
+/* Slot 3: Description */
+.detail-slot--desc {
+}
+
 .detail-desc {
-  margin: 0 0 0.4vw;
+  margin: 0;
   font-size: 1vw;
   color: var(--color-text-dim);
+}
+
+/* Slot 4: Entitlement/action */
+.detail-slot--action {
 }
 
 .detail-entitlement {
