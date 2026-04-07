@@ -27,7 +27,7 @@
   padding: 0.4vw 1vw;
   margin: 0 var(--padding-edge);
   border-radius: 999px;
-  background: #2a2a2a;
+  background: var(--color-surface);
   transition:
     opacity 0.4s ease,
     background 0.4s ease;

@@ -81,6 +81,34 @@ export function HomePage() {
   useEffect(() => {
     const move = (e: KeyboardEvent) => {
       const key = e.key;
+
+      // H key — go to Home (compact nav with Home selected)
+      if (key === "h" || key === "H") {
+        e.preventDefault();
+        expandedRef.current = false;
+        setExpanded(false);
+        setPos([0, HOME_NAV_INDEX]);
+        setSelectedNavIndex(HOME_NAV_INDEX);
+        return;
+      }
+
+      // Enter — select current item
+      if (key === "Enter") {
+        e.preventDefault();
+        if (expandedRef.current) {
+          // From expanded, go to compact nav
+          expandedRef.current = false;
+          setExpanded(false);
+          return;
+        }
+        // From nav bar, go into content
+        if (pos[0] === 0) {
+          setSelectedNavIndex(pos[1]);
+          setPos([1, 0]);
+        }
+        return;
+      }
+
       if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(key))
         return;
       e.preventDefault();
@@ -174,9 +202,7 @@ export function HomePage() {
           className="panel"
           style={{
             transform: `translateY(${panelY})`,
-            backgroundColor: expanded
-              ? "rgba(26, 26, 26, 0)"
-              : "rgba(26, 26, 26, 1)",
+            backgroundColor: expanded ? "transparent" : "var(--color-bg)",
             transition:
               "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
           }}

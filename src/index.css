@@ -24,6 +24,8 @@
   --color-overlay: rgba(0, 0, 0, 0.8);
   --color-button-bg: #5a5a5a;
   --color-button-text: #c2c2c2;
+  --color-button-active-bg: #fff;
+  --color-button-active-text: #000;
   --color-dot: rgba(255, 255, 255, 0.3);
   --color-nav-icon: #c2c2c2;
   --color-nav-icon-active: #f0f0f0;
@@ -48,6 +50,8 @@
   --color-overlay: rgba(255, 255, 255, 0.8);
   --color-button-bg: #ddd;
   --color-button-text: #333;
+  --color-button-active-bg: #00a0ff;
+  --color-button-active-text: #fff;
   --color-dot: rgba(0, 0, 0, 0.3);
   --color-nav-icon: #666;
   --color-nav-icon-active: #000;

@@ -53,8 +53,8 @@
     from var(--highlight-angle, 0deg),
     var(--color-border) 0deg,
     var(--color-border) 280deg,
-    var(--color-accent) 320deg,
-    var(--color-accent) 340deg,
+    #fff 320deg,
+    #fff 340deg,
     var(--color-border) 360deg
   );
   animation: rotate-highlight 2.5s linear infinite;

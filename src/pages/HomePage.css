@@ -80,8 +80,8 @@
 }
 
 .carousel-controls__learn-more--active {
-  background: var(--color-accent);
-  color: var(--color-accent-inverse);
+  background: var(--color-button-active-bg);
+  color: var(--color-button-active-text);
 }
 
 .carousel-controls__dots {
@@ -94,13 +94,13 @@
   width: 0.6vw;
   height: 0.6vw;
   border-radius: 50%;
-  background: var(--color-dot);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .carousel-controls__dot--active {
   width: 1.4vw;
   border-radius: 0.3vw;
-  background: var(--color-accent);
+  background: #fff;
 }
 
 .detail-motion-wrapper {
