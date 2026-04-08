@@ -20,6 +20,7 @@ import { RowScroller } from "../components/RowScroller";
 import { FullscreenToggle } from "../components/FullscreenToggle";
 import { ControlsOverlay } from "../components/ControlsOverlay";
 import { VideoPlayer } from "../components/VideoPlayer";
+import { InstallBanner } from "../components/InstallBanner";
 import "./HomePage.css";
 
 const NAV_ROW_LENGTH = ALL_NAV.length;
@@ -142,6 +143,7 @@ export function HomePage() {
 
   return (
     <div className="home-page">
+      <InstallBanner />
       <ControlsOverlay />
       <FullscreenToggle />
       <VideoPlayer

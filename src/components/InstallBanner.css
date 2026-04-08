@@ -1,0 +1,37 @@
+.install-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10002;
+  background: #232f3e;
+  color: #f0f0f0;
+  font-size: 14px;
+  font-family:
+    "Amazon Ember",
+    -apple-system,
+    sans-serif;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.install-banner a {
+  color: #48a3f8;
+  text-decoration: underline;
+}
+
+.install-banner__close {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+.install-banner__close:hover {
+  color: #fff;
+}
