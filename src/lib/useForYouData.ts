@@ -1,21 +1,21 @@
 import { useEffect, useState } from "react";
 import type { ContentItem } from "./types";
 import { isAmazonContext } from "./amazonService";
-import { fetchMyStuff } from "./myStuffParser";
+import { fetchForYou } from "./forYouParser";
 import { enrichItemMetadata } from "./enrichApi";
 import { ENRICH_BATCH_SIZE } from "./constants";
 
-export interface MyStuffRow {
+export interface ForYouContentRow {
   id: string;
   title: string;
   items: ContentItem[];
 }
 
-export function useMyStuffData(): {
-  rows: MyStuffRow[];
+export function useForYouData(): {
+  rows: ForYouContentRow[];
   loading: boolean;
 } {
-  const [rows, setRows] = useState<MyStuffRow[]>([]);
+  const [rows, setRows] = useState<ForYouContentRow[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -26,47 +26,26 @@ export function useMyStuffData(): {
     async function load() {
       setLoading(true);
       try {
-        const { watchlist, library } = await fetchMyStuff();
+        const { rows: forYouRows } = await fetchForYou();
         if (cancelled) return;
 
-        const initial: MyStuffRow[] = [];
-
-        if (watchlist.length > 0) {
-          initial.push({
-            id: "mystuff-watchlist",
-            title: "Watchlist",
-            items: watchlist.map((item, i) => ({
-              id: item.titleID ?? `wl-${i}`,
-              title: item.title || item.titleID || "Untitled",
-              thumbnail: item.image?.url,
-            })),
-          });
-        }
-
-        if (library.length > 0) {
-          initial.push({
-            id: "mystuff-library",
-            title: "Purchases and Rentals",
-            items: library.map((item, i) => ({
-              id: item.titleID ?? `lib-${i}`,
-              title: item.title || item.titleID || "Untitled",
-              thumbnail: item.image?.url,
-            })),
-          });
-        }
+        const initial: ForYouContentRow[] = forYouRows.map((r) => ({
+          id: `foryou-${r.rowIndex}`,
+          title: r.title,
+          items: r.items.map((item, j) => ({
+            id: item.titleID ?? `fy-${r.rowIndex}-${j}`,
+            title: item.title || item.titleID || "Untitled",
+            thumbnail: item.image?.url,
+          })),
+        }));
 
         setRows(initial);
 
-        // Enrich all items for metadata
+        // Enrich all items
         const allIds = new Set<string>();
         for (const r of initial)
           for (const item of r.items)
-            if (
-              item.id &&
-              !item.id.startsWith("wl-") &&
-              !item.id.startsWith("lib-")
-            )
-              allIds.add(item.id);
+            if (item.id && !item.id.startsWith("fy-")) allIds.add(item.id);
 
         const idArr = [...allIds];
         for (let i = 0; i < idArr.length; i += ENRICH_BATCH_SIZE) {
@@ -114,7 +93,7 @@ export function useMyStuffData(): {
           }
         }
       } catch (err) {
-        console.warn("[useMyStuffData] Error:", err);
+        console.warn("[useForYouData] Error:", err);
       }
       if (!cancelled) setLoading(false);
     }

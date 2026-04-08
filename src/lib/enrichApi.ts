@@ -26,6 +26,7 @@ export async function enrichItemMetadata(
       preroll: true,
       trailer: true,
       watchlist: true,
+      images: true,
     }),
     titleIDsToEnrich: JSON.stringify(titleIds),
     journeyIngressContext: "",

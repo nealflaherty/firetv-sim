@@ -7,6 +7,7 @@ import { useNavigation, HOME_NAV_INDEX } from "../lib/useNavigation";
 import { generateContentForCategory } from "../lib/placeholderContent";
 import { useMyStuffData } from "../lib/useMyStuffData";
 import { useLunaData } from "../lib/useLunaData";
+import { useForYouData } from "../lib/useForYouData";
 import type { ContentItem } from "../lib/types";
 import { HeroTrailer } from "../components/HeroTrailer";
 import { NavBar } from "../components/NavBar";
@@ -32,6 +33,7 @@ export function HomePage() {
   const { rows: amazonRows, resolveTrailer } = useAmazonData();
   const { rows: myStuffRows } = useMyStuffData();
   const { rows: lunaRows } = useLunaData();
+  const { rows: forYouRows } = useForYouData();
 
   // Build content rows based on selected nav
   const homeContentRows = useMemo(() => {
@@ -53,14 +55,16 @@ export function HomePage() {
   // Resolve content rows for the active nav category
   const contentRowsForNav = useMemo(
     () => (navIdx: number) => {
-      if (navIdx === HOME_NAV_INDEX) return homeContentRows;
+      if (navIdx === HOME_NAV_INDEX) {
+        return forYouRows.length > 0 ? forYouRows : homeContentRows;
+      }
       const label = ALL_NAV[navIdx]?.label ?? "Unknown";
       if (label === "Prime Video" && amazonRows.length > 0) return amazonRows;
       if (label === "My Stuff" && myStuffRows.length > 0) return myStuffRows;
       if (label === "Games" && lunaRows.length > 0) return lunaRows;
       return generateContentForCategory(label);
     },
-    [homeContentRows, amazonRows, myStuffRows, lunaRows],
+    [homeContentRows, amazonRows, myStuffRows, lunaRows, forYouRows],
   );
 
   // Row lengths for navigation bounds

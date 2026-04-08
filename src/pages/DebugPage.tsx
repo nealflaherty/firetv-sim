@@ -979,6 +979,108 @@ export function DebugPage() {
         >
           {loading === "mystuff" ? "Fetching…" : "Fetch My Stuff"}
         </button>
+
+        <button
+          onClick={async () => {
+            setLoading("foryou");
+            try {
+              const resp = await fetch(
+                "https://www.amazon.com/gp/video/collection/mgForYou",
+                {
+                  credentials: "include",
+                  headers: { Accept: "text/html" },
+                },
+              );
+              const html = await resp.text();
+              const doc = new DOMParser().parseFromString(html, "text/html");
+
+              // Find all links with title IDs
+              const links = doc.querySelectorAll(
+                'a[href*="/dp/"], a[href*="/detail/"], a[href*="/gp/video/detail/"]',
+              );
+              const items: {
+                href: string;
+                text: string;
+                img?: string;
+                titleId?: string;
+              }[] = [];
+              const seen = new Set<string>();
+              for (const link of links) {
+                const href = link.getAttribute("href") ?? "";
+                const titleId =
+                  href.match(/\/dp\/([A-Z0-9]{10})/)?.[1] ??
+                  href.match(/\/detail\/([A-Z0-9]{10,30})/)?.[1] ??
+                  href.match(/\/gp\/video\/detail\/([A-Z0-9]{10,30})/)?.[1];
+                if (titleId && seen.has(titleId)) continue;
+                if (titleId) seen.add(titleId);
+                const img = link.querySelector("img");
+                items.push({
+                  href: href.slice(0, 150),
+                  text: (
+                    link.getAttribute("aria-label") ??
+                    img?.getAttribute("alt") ??
+                    link.textContent?.trim() ??
+                    ""
+                  ).slice(0, 100),
+                  img: img?.getAttribute("src")?.slice(0, 200),
+                  titleId,
+                });
+              }
+
+              // Find carousels/sections
+              const sections = doc.querySelectorAll(
+                'section, [class*="carousel"], [class*="Carousel"]',
+              );
+              const sectionInfo = [...sections].slice(0, 20).map((s) => ({
+                tag: s.tagName,
+                class: s.className?.toString().slice(0, 100),
+                testId: s.getAttribute("data-testid"),
+                heading: s
+                  .querySelector("h2, h3")
+                  ?.textContent?.trim()
+                  ?.slice(0, 80),
+                linkCount: s.querySelectorAll(
+                  'a[href*="/dp/"], a[href*="/detail/"]',
+                ).length,
+              }));
+
+              addLog(
+                `ForYou: ${html.length} chars, ${items.length} items, ${sections.length} sections`,
+              );
+              showData("ForYou page", {
+                htmlLength: html.length,
+                title: doc.title,
+                itemCount: items.length,
+                items: items.slice(0, 60),
+                sections: sectionInfo,
+                images: [...doc.querySelectorAll("img[src]")]
+                  .slice(0, 50)
+                  .map((img) => ({
+                    src: (img.getAttribute("src") ?? "").slice(0, 200),
+                    alt: img.getAttribute("alt")?.slice(0, 80),
+                    dataSrc: img.getAttribute("data-src")?.slice(0, 200),
+                    parentTag: img.parentElement?.tagName,
+                    parentClass: img.parentElement?.className
+                      ?.toString()
+                      .slice(0, 100),
+                    nearestLink: img
+                      .closest("a")
+                      ?.getAttribute("href")
+                      ?.slice(0, 100),
+                    nearestSection: img
+                      .closest("[data-testid]")
+                      ?.getAttribute("data-testid"),
+                  })),
+              });
+            } catch (err) {
+              addLog(`ForYou error: ${err}`);
+            }
+            setLoading("");
+          }}
+          disabled={!!loading}
+        >
+          {loading === "foryou" ? "Fetching…" : "Fetch For You"}
+        </button>
       </div>
 
       <div className="debug-panels">
