@@ -24,6 +24,7 @@ export interface NavigationActions {
   goHome: () => void;
   clickNav: (idx: number) => void;
   clickTile: (rowIdx: number, colIdx: number) => void;
+  advanceTrailer: () => void;
 }
 
 export function useNavigation(
