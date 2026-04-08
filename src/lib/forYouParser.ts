@@ -23,15 +23,26 @@ export interface ForYouResult {
 }
 
 export async function fetchForYou(): Promise<ForYouResult> {
+  return fetchVideoCollection(FOR_YOU_URL, "forYouParser");
+}
+
+/**
+ * Generic fetcher for Amazon Video collection pages that use
+ * card-section + base-image + _brws_ row numbering.
+ */
+export async function fetchVideoCollection(
+  url: string,
+  tag = "videoCollection",
+): Promise<ForYouResult> {
   const result: ForYouResult = { rows: [], totalItems: 0 };
 
   try {
-    const resp = await fetch(FOR_YOU_URL, {
+    const resp = await fetch(url, {
       credentials: "include",
       headers: { Accept: "text/html" },
     });
     if (!resp.ok) {
-      console.warn(`[forYouParser] Fetch failed: ${resp.status}`);
+      console.warn(`[${tag}] Fetch failed: ${resp.status}`);
       return result;
     }
 
@@ -41,10 +52,10 @@ export async function fetchForYou(): Promise<ForYouResult> {
     result.rows = extractRows(doc);
     result.totalItems = result.rows.reduce((s, r) => s + r.items.length, 0);
     console.log(
-      `[forYouParser] Found ${result.rows.length} rows, ${result.totalItems} items`,
+      `[${tag}] Found ${result.rows.length} rows, ${result.totalItems} items`,
     );
   } catch (err) {
-    console.warn("[forYouParser] Error:", err);
+    console.warn(`[${tag}] Error:`, err);
   }
 
   return result;
@@ -55,60 +66,86 @@ export async function fetchForYou(): Promise<ForYouResult> {
 // ---------------------------------------------------------------------------
 
 function extractRows(doc: Document): ForYouRow[] {
-  const rowMap = new Map<number, AmazonWidgetItem[]>();
+  const rows: ForYouRow[] = [];
   const seen = new Set<string>();
 
-  // Strategy 1: Use card-section elements — each has a link + base-image
-  const cards = doc.querySelectorAll('[data-testid="card-section"]');
-  for (const card of cards) {
-    const link = card.querySelector(
-      'a[href*="/gp/video/detail/"], a[href*="/dp/"], a[href*="/detail/"]',
+  // Strategy 1: Find carousel wrappers and extract cards from each
+  const carousels = doc.querySelectorAll(
+    '[data-testid="navigation-carousel-wrapper"]',
+  );
+
+  console.log(
+    `[videoCollection] Found ${carousels.length} carousels, ${doc.querySelectorAll('[data-testid="card-section"]').length} total cards`,
+  );
+
+  for (const carousel of carousels) {
+    const heading = carousel
+      .querySelector("h2, h3, [class*='heading'], [class*='Heading']")
+      ?.textContent?.trim();
+
+    const cards = carousel.querySelectorAll('[data-testid="card-section"]');
+    const items: AmazonWidgetItem[] = [];
+
+    console.log(
+      `[videoCollection] Carousel "${heading}": ${cards.length} cards`,
     );
-    if (!link) continue;
 
-    const href = link.getAttribute("href") ?? "";
-    const titleID =
-      href.match(/\/gp\/video\/detail\/([A-Z0-9]{10,30})/)?.[1] ??
-      href.match(/\/dp\/([A-Z0-9]{10})/)?.[1] ??
-      href.match(/\/detail\/([A-Z0-9]{10,30})/)?.[1];
-    if (!titleID || seen.has(titleID)) continue;
-    seen.add(titleID);
-
-    // Row number from ref param: _brws_2_5 → row 2
-    const rowMatch = href.match(/_brws_(\d+)_(\d+)/);
-    const rowIndex = rowMatch ? parseInt(rowMatch[1], 10) : 0;
-
-    // Image: look for base-image or any pv-target-images img in the card
-    let imgUrl: string | undefined;
-    const baseImg = card.querySelector('[data-testid="base-image"] img[src]');
-    if (baseImg) {
-      imgUrl = baseImg.getAttribute("src") ?? undefined;
-    }
-    if (!imgUrl) {
-      for (const img of card.querySelectorAll("img[src]")) {
-        const src = img.getAttribute("src") ?? "";
-        if (src.includes("pv-target-images")) {
-          imgUrl = src;
-          break;
-        }
+    for (const card of cards) {
+      const item = extractCardItem(card, seen);
+      if (item) {
+        console.log(
+          `[videoCollection]   Item: ${item.title}, img: ${item.image?.url?.slice(0, 60)}`,
+        );
+        items.push(item);
       }
     }
 
-    // Title from link
-    const title =
-      link.getAttribute("aria-label") ?? link.textContent?.trim() ?? undefined;
-
-    const items = rowMap.get(rowIndex) ?? [];
-    items.push({
-      titleID,
-      title: title || undefined,
-      image: imgUrl ? { url: imgUrl } : undefined,
-    });
-    rowMap.set(rowIndex, items);
+    if (items.length >= 2) {
+      rows.push({
+        rowIndex: rows.length,
+        title: heading ?? `Row ${rows.length + 1}`,
+        items,
+      });
+    }
   }
 
-  // Strategy 2: Fallback to link-based extraction if no card-sections found
-  if (rowMap.size === 0) {
+  // Strategy 2: Pick up card-sections not inside a carousel wrapper
+  if (rows.length === 0) {
+    const allCards = doc.querySelectorAll('[data-testid="card-section"]');
+    const rowMap = new Map<number, AmazonWidgetItem[]>();
+
+    for (const card of allCards) {
+      const item = extractCardItem(card, seen);
+      if (!item) continue;
+
+      // Try to group by _brws_ ref
+      const link = card.querySelector("a[href]");
+      const href = link?.getAttribute("href") ?? "";
+      const rowMatch = href.match(/_brws_(\d+)_/);
+      const rowIndex = rowMatch ? parseInt(rowMatch[1], 10) : 0;
+
+      const items = rowMap.get(rowIndex) ?? [];
+      items.push(item);
+      rowMap.set(rowIndex, items);
+    }
+
+    const headings = extractRowHeadings(doc);
+    for (const [idx, items] of [...rowMap.entries()].sort(
+      ([a], [b]) => a - b,
+    )) {
+      if (items.length >= 2) {
+        rows.push({
+          rowIndex: idx,
+          title: headings.get(idx) ?? `Row ${idx}`,
+          items,
+        });
+      }
+    }
+  }
+
+  // Strategy 3: Fallback to link-based extraction
+  if (rows.length === 0) {
+    const linkItems: AmazonWidgetItem[] = [];
     const links = doc.querySelectorAll(
       'a[href*="/gp/video/detail/"], a[href*="/dp/"], a[href*="/detail/"]',
     );
@@ -121,31 +158,94 @@ function extractRows(doc: Document): ForYouRow[] {
       if (!titleID || seen.has(titleID)) continue;
       seen.add(titleID);
 
-      const rowMatch = href.match(/_brws_(\d+)_(\d+)/);
-      const rowIndex = rowMatch ? parseInt(rowMatch[1], 10) : 0;
-
       const title =
         link.getAttribute("aria-label") ??
         link.textContent?.trim() ??
         undefined;
 
-      const items = rowMap.get(rowIndex) ?? [];
-      items.push({ titleID, title: title || undefined });
-      rowMap.set(rowIndex, items);
+      linkItems.push({ titleID, title: title || undefined });
+    }
+    if (linkItems.length >= 2) {
+      rows.push({ rowIndex: 0, title: "Content", items: linkItems });
     }
   }
 
-  // Find row headings
-  const headings = extractRowHeadings(doc);
+  return rows;
+}
 
-  return [...rowMap.entries()]
-    .sort(([a], [b]) => a - b)
-    .filter(([, items]) => items.length >= 2)
-    .map(([idx, items]) => ({
-      rowIndex: idx,
-      title: headings.get(idx) ?? `Recommended ${idx}`,
-      items,
-    }));
+/** Extract a single item from a card-section element */
+function extractCardItem(
+  card: Element,
+  seen: Set<string>,
+): AmazonWidgetItem | null {
+  // Get image
+  let imgUrl: string | undefined;
+  const baseImg = card.querySelector('[data-testid="base-image"] img[src]');
+  if (baseImg) {
+    imgUrl = baseImg.getAttribute("src") ?? undefined;
+  }
+  if (!imgUrl) {
+    for (const img of card.querySelectorAll("img[src]")) {
+      const src = img.getAttribute("src") ?? "";
+      if (
+        src.includes("pv-target-images") ||
+        src.includes("le-target-images") ||
+        src.includes("m.media-amazon.com/images/I/")
+      ) {
+        imgUrl = src;
+        break;
+      }
+    }
+  }
+
+  // Also try to get a meaningful alt from any image in the card
+  const anyImgWithAlt = card.querySelector("img[alt][src]");
+  const fallbackAlt = anyImgWithAlt?.getAttribute("alt") ?? "";
+
+  // Try standard /dp/ link first
+  const link = card.querySelector(
+    'a[href*="/gp/video/detail/"], a[href*="/dp/"], a[href*="/detail/"]',
+  );
+
+  if (link) {
+    const href = link.getAttribute("href") ?? "";
+    const titleID =
+      href.match(/\/gp\/video\/detail\/([A-Z0-9]{10,30})/)?.[1] ??
+      href.match(/\/dp\/([A-Z0-9]{10})/)?.[1] ??
+      href.match(/\/detail\/([A-Z0-9]{10,30})/)?.[1];
+    if (!titleID || seen.has(titleID)) return null;
+    seen.add(titleID);
+
+    const title =
+      link.getAttribute("aria-label") ?? link.textContent?.trim() ?? undefined;
+
+    return {
+      titleID,
+      title: title || undefined,
+      image: imgUrl ? { url: imgUrl } : undefined,
+    };
+  }
+
+  // No /dp/ link — use image alt text (live channels, news)
+  if (imgUrl) {
+    const imgAlt = baseImg?.getAttribute("alt") ?? fallbackAlt;
+    if (!imgAlt || imgAlt.length < 3) return null;
+
+    const id = `card-${imgAlt
+      .replace(/[^a-zA-Z0-9]/g, "-")
+      .toLowerCase()
+      .slice(0, 40)}`;
+    if (seen.has(id)) return null;
+    seen.add(id);
+
+    return {
+      titleID: id,
+      title: imgAlt,
+      image: { url: imgUrl },
+    };
+  }
+
+  return null;
 }
 
 // ---------------------------------------------------------------------------

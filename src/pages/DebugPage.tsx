@@ -1081,6 +1081,199 @@ export function DebugPage() {
         >
           {loading === "foryou" ? "Fetching…" : "Fetch For You"}
         </button>
+
+        <button
+          onClick={async () => {
+            setLoading("livetv");
+            try {
+              const resp = await fetch(
+                "https://www.amazon.com/gp/video/livetv",
+                {
+                  credentials: "include",
+                  headers: { Accept: "text/html" },
+                },
+              );
+              const html = await resp.text();
+              const doc = new DOMParser().parseFromString(html, "text/html");
+
+              const links = doc.querySelectorAll(
+                'a[href*="/dp/"], a[href*="/detail/"], a[href*="/gp/video/"]',
+              );
+              const items: {
+                href: string;
+                text: string;
+                img?: string;
+                titleId?: string;
+              }[] = [];
+              const seen = new Set<string>();
+              for (const link of links) {
+                const href = link.getAttribute("href") ?? "";
+                const titleId =
+                  href.match(/\/dp\/([A-Z0-9]{10})/)?.[1] ??
+                  href.match(/\/detail\/([A-Z0-9]{10,30})/)?.[1] ??
+                  href.match(/\/gp\/video\/detail\/([A-Z0-9]{10,30})/)?.[1];
+                if (titleId && seen.has(titleId)) continue;
+                if (titleId) seen.add(titleId);
+                const img = link.querySelector("img");
+                items.push({
+                  href: href.slice(0, 150),
+                  text: (
+                    link.getAttribute("aria-label") ??
+                    img?.getAttribute("alt") ??
+                    link.textContent?.trim() ??
+                    ""
+                  ).slice(0, 100),
+                  img: img?.getAttribute("src")?.slice(0, 200),
+                  titleId,
+                });
+              }
+
+              const cards = doc.querySelectorAll(
+                '[data-testid="card-section"]',
+              );
+              const cardInfo = [...cards].slice(0, 20).map((card) => {
+                const cardLink = card.querySelector("a[href]");
+                const cardImg = card.querySelector(
+                  '[data-testid="base-image"] img[src], img[src*="pv-target-images"]',
+                );
+                return {
+                  href: cardLink?.getAttribute("href")?.slice(0, 150),
+                  text: (
+                    cardLink?.getAttribute("aria-label") ??
+                    cardLink?.textContent?.trim() ??
+                    ""
+                  ).slice(0, 100),
+                  img: cardImg?.getAttribute("src")?.slice(0, 200),
+                };
+              });
+
+              const sections = doc.querySelectorAll(
+                '[data-testid="navigation-carousel-wrapper"], [data-testid="standard-carousel"]',
+              );
+              const sectionInfo = [...sections].slice(0, 20).map((s) => ({
+                testId: s.getAttribute("data-testid"),
+                heading: s
+                  .querySelector("h2, h3")
+                  ?.textContent?.trim()
+                  ?.slice(0, 80),
+                linkCount: s.querySelectorAll(
+                  'a[href*="/dp/"], a[href*="/detail/"], a[href*="/gp/video/"]',
+                ).length,
+              }));
+
+              const images = [...doc.querySelectorAll("img[src]")]
+                .slice(0, 50)
+                .map((img) => ({
+                  src: (img.getAttribute("src") ?? "").slice(0, 200),
+                  alt: img.getAttribute("alt")?.slice(0, 80),
+                  nearestSection: img
+                    .closest("[data-testid]")
+                    ?.getAttribute("data-testid"),
+                }));
+
+              addLog(
+                `LiveTV: ${html.length} chars, ${items.length} links, ${cards.length} cards, ${sections.length} sections`,
+              );
+              showData("LiveTV page", {
+                htmlLength: html.length,
+                title: doc.title,
+                linkCount: items.length,
+                links: items.slice(0, 40),
+                cards: cardInfo,
+                sections: sectionInfo,
+                images: images.filter(
+                  (i) =>
+                    i.src.includes("pv-target-images") ||
+                    i.nearestSection === "base-image",
+                ),
+              });
+            } catch (err) {
+              addLog(`LiveTV error: ${err}`);
+            }
+            setLoading("");
+          }}
+          disabled={!!loading}
+        >
+          {loading === "livetv" ? "Fetching…" : "Fetch Live TV"}
+        </button>
+
+        <button
+          onClick={async () => {
+            setLoading("news");
+            try {
+              const resp = await fetch("https://www.amazon.com/gp/video/news", {
+                credentials: "include",
+                headers: { Accept: "text/html" },
+              });
+              const html = await resp.text();
+              const doc = new DOMParser().parseFromString(html, "text/html");
+
+              const cards = doc.querySelectorAll(
+                '[data-testid="card-section"]',
+              );
+              const cardInfo = [...cards].slice(0, 20).map((card) => {
+                const cardLink = card.querySelector("a[href]");
+                const imgs = [...card.querySelectorAll("img[src]")].map(
+                  (img) => ({
+                    src: (img.getAttribute("src") ?? "").slice(0, 200),
+                    alt: img.getAttribute("alt")?.slice(0, 80),
+                    testId: img
+                      .closest("[data-testid]")
+                      ?.getAttribute("data-testid"),
+                  }),
+                );
+                return {
+                  href: cardLink?.getAttribute("href")?.slice(0, 150),
+                  text: (
+                    cardLink?.getAttribute("aria-label") ??
+                    cardLink?.textContent?.trim() ??
+                    ""
+                  ).slice(0, 100),
+                  images: imgs,
+                };
+              });
+
+              // All images with pv-target or le-target or base-image
+              const allImgs = [...doc.querySelectorAll("img[src]")]
+                .filter((img) => {
+                  const src = img.getAttribute("src") ?? "";
+                  const testId =
+                    img.closest("[data-testid]")?.getAttribute("data-testid") ??
+                    "";
+                  return (
+                    src.includes("pv-target") ||
+                    src.includes("le-target") ||
+                    testId === "base-image"
+                  );
+                })
+                .slice(0, 30)
+                .map((img) => ({
+                  src: (img.getAttribute("src") ?? "").slice(0, 200),
+                  alt: img.getAttribute("alt")?.slice(0, 80),
+                  testId: img
+                    .closest("[data-testid]")
+                    ?.getAttribute("data-testid"),
+                  inCard: !!img.closest('[data-testid="card-section"]'),
+                }));
+
+              addLog(
+                `News: ${html.length} chars, ${cards.length} cards, ${allImgs.length} content images`,
+              );
+              showData("News page", {
+                htmlLength: html.length,
+                cardCount: cards.length,
+                cards: cardInfo,
+                contentImages: allImgs,
+              });
+            } catch (err) {
+              addLog(`News error: ${err}`);
+            }
+            setLoading("");
+          }}
+          disabled={!!loading}
+        >
+          {loading === "news" ? "Fetching…" : "Fetch News"}
+        </button>
       </div>
 
       <div className="debug-panels">

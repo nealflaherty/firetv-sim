@@ -8,6 +8,10 @@ import { generateContentForCategory } from "../lib/placeholderContent";
 import { useMyStuffData } from "../lib/useMyStuffData";
 import { useLunaData } from "../lib/useLunaData";
 import { useForYouData } from "../lib/useForYouData";
+import { useLiveTvData } from "../lib/useLiveTvData";
+import { useFreeData } from "../lib/useFreeData";
+import { useNewsData } from "../lib/useNewsData";
+import { useKidsData } from "../lib/useKidsData";
 import type { ContentItem } from "../lib/types";
 import { HeroTrailer } from "../components/HeroTrailer";
 import { NavBar } from "../components/NavBar";
@@ -34,6 +38,10 @@ export function HomePage() {
   const { rows: myStuffRows } = useMyStuffData();
   const { rows: lunaRows } = useLunaData();
   const { rows: forYouRows } = useForYouData();
+  const { rows: liveTvRows } = useLiveTvData();
+  const { rows: freeRows } = useFreeData();
+  const { rows: newsRows } = useNewsData();
+  const { rows: kidsRows } = useKidsData();
 
   // Build content rows based on selected nav
   const homeContentRows = useMemo(() => {
@@ -62,9 +70,23 @@ export function HomePage() {
       if (label === "Prime Video" && amazonRows.length > 0) return amazonRows;
       if (label === "My Stuff" && myStuffRows.length > 0) return myStuffRows;
       if (label === "Games" && lunaRows.length > 0) return lunaRows;
+      if (label === "Live" && liveTvRows.length > 0) return liveTvRows;
+      if (label === "Free" && freeRows.length > 0) return freeRows;
+      if (label === "News" && newsRows.length > 0) return newsRows;
+      if (label === "Amazon Kids" && kidsRows.length > 0) return kidsRows;
       return generateContentForCategory(label);
     },
-    [homeContentRows, amazonRows, myStuffRows, lunaRows, forYouRows],
+    [
+      homeContentRows,
+      amazonRows,
+      myStuffRows,
+      lunaRows,
+      forYouRows,
+      liveTvRows,
+      freeRows,
+      newsRows,
+      kidsRows,
+    ],
   );
 
   // Row lengths for navigation bounds
