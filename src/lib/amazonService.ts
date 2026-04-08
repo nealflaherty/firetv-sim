@@ -67,7 +67,6 @@ interface EnrichedItem {
   watchlistAction?: {
     endpoint?: string;
   };
-  [key: string]: unknown; // capture any extra fields for debugging
 }
 
 // ---------------------------------------------------------------------------
@@ -696,58 +695,6 @@ interface EnrichRequest {
   titleIds: string[];
   deviceTypeId?: string;
   marketplaceId?: string;
-}
-
-/**
- * Fetch titles for a batch of ASINs by loading their /dp/ pages
- * and extracting the title from the HTML <title> tag.
- * Returns a map of ASIN → title.
- */
-export async function fetchTitlesForAsins(
-  asins: string[],
-): Promise<Map<string, string>> {
-  const titles = new Map<string, string>();
-
-  // Fetch in parallel, max 5 concurrent
-  const CONCURRENCY = 5;
-  const queue = [...asins];
-
-  async function worker() {
-    while (queue.length > 0) {
-      const asin = queue.shift();
-      if (!asin) break;
-      try {
-        const resp = await fetch(`${AMAZON_ORIGIN}/dp/${asin}`, {
-          credentials: "include",
-          headers: {
-            Accept: "text/html",
-            "X-Requested-With": "XMLHttpRequest",
-          },
-        });
-        if (!resp.ok) continue;
-        // Only read first chunk for the <title> tag
-        const text = await resp.text();
-        const match = text.match(/<title[^>]*>([^<]+)<\/title>/i);
-        if (match) {
-          // Amazon titles are like "Watch Title | Prime Video"
-          let title = match[1].trim();
-          // Strip common suffixes
-          title = title
-            .replace(/\s*\|\s*Prime Video.*$/i, "")
-            .replace(/\s*-\s*Amazon\.com.*$/i, "")
-            .replace(/^Amazon\.com:\s*/i, "")
-            .replace(/^Watch\s+/i, "")
-            .trim();
-          if (title) titles.set(asin, title);
-        }
-      } catch {
-        /* skip */
-      }
-    }
-  }
-
-  await Promise.all(Array.from({ length: CONCURRENCY }, () => worker()));
-  return titles;
 }
 
 /**

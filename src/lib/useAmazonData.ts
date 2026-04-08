@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ContentItem } from "./types";
+import { ENRICH_BATCH_SIZE } from "./constants";
 import {
   isAmazonContext,
   fetchStorefrontHtml,
@@ -59,7 +60,7 @@ export function useAmazonData(): {
           for (const item of r.items)
             if (item.id && !item.id.startsWith("amz-")) allIds.add(item.id);
 
-        const BATCH = 13;
+        const BATCH = ENRICH_BATCH_SIZE;
         const idArr = [...allIds];
 
         for (let i = 0; i < idArr.length; i += BATCH) {

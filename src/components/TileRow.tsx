@@ -1,11 +1,8 @@
 import { useMemo } from "react";
+import { VISIBLE_COMPACT, FOCUS_SCALE, ROW_SCALE } from "../lib/constants";
 import type { ContentItem } from "../lib/types";
 import { TileItem } from "./TileItem";
 import "./TileRow.css";
-
-const VISIBLE_COMPACT = 5;
-const FOCUS_SCALE = 1.22;
-const ROW_SCALE = 1.04;
 
 interface Props {
   items: ContentItem[];

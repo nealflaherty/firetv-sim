@@ -1,106 +1,22 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ALL_NAV } from "../layout";
 import { useHomeData } from "../lib/useHomeData";
 import { useAmazonData } from "../lib/useAmazonData";
+import { useNavigation, HOME_NAV_INDEX } from "../lib/useNavigation";
 import { generateContentForCategory } from "../lib/placeholderContent";
 import type { ContentItem } from "../lib/types";
 import { HeroTrailer } from "../components/HeroTrailer";
 import { NavBar } from "../components/NavBar";
 import { DetailPanel, DetailBackground } from "../components/DetailPanel";
-import { TileRow } from "../components/TileRow";
+import { RowScroller } from "../components/RowScroller";
 import { FullscreenToggle } from "../components/FullscreenToggle";
 import "./HomePage.css";
 
-const HOME_NAV_INDEX = 4;
-const NAV_ROW = ALL_NAV.map((_item, i) => ({ id: `nav-${i}` }));
-const INITIAL: [number, number] = [0, HOME_NAV_INDEX];
+const NAV_ROW_LENGTH = ALL_NAV.length;
 
 const transition = { duration: 0.6, ease: [0.4, 0, 0.2, 1] as const };
 
-// Extracted component that measures row positions for precise scrolling
-function RowScroller({
-  contentRows,
-  focusedRow,
-  focusedCol,
-  inContent,
-  scrollToRow,
-  onItemClick,
-}: {
-  contentRows: { id: string; title?: string; items: ContentItem[] }[];
-  focusedRow: number;
-  focusedCol: number;
-  inContent: boolean;
-  scrollToRow: number;
-  onItemClick?: (rowIndex: number, colIndex: number) => void;
-}) {
-  const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const [scrollY, setScrollY] = useState(0);
-
-  useEffect(() => {
-    if (scrollToRow < 0) {
-      setScrollY(0);
-      return;
-    }
-    const el = rowRefs.current[scrollToRow];
-    if (el) {
-      // offsetTop relative to the scroll container
-      setScrollY(-el.offsetTop);
-    }
-  }, [scrollToRow]);
-
-  return (
-    <motion.div
-      className="tile-scroll"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1, y: scrollY }}
-      exit={{ opacity: 0, position: "absolute" as const, inset: 0 }}
-      transition={{
-        opacity: { duration: 0.15, ease: [0.4, 0, 0.2, 1] },
-        y: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
-      }}
-    >
-      {contentRows.map((cr, i) => {
-        const isFocusedRow = focusedRow === i;
-        return (
-          <div
-            key={cr.id}
-            ref={(el) => {
-              rowRefs.current[i] = el;
-            }}
-            style={{
-              position: "relative",
-              zIndex: isFocusedRow ? 10 : 1,
-              opacity: scrollToRow >= 0 && i < scrollToRow ? 0 : 1,
-              transition: "opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
-            }}
-          >
-            {cr.title && (
-              <div
-                className={`tile-section-title${isFocusedRow ? " tile-section-title--focused" : ""}`}
-              >
-                {cr.title}
-              </div>
-            )}
-            <TileRow
-              items={cr.items}
-              focusedIndex={isFocusedRow ? focusedCol : null}
-              expanded={inContent}
-              onItemClick={
-                onItemClick ? (col) => onItemClick(i, col) : undefined
-              }
-            />
-          </div>
-        );
-      })}
-    </motion.div>
-  );
-}
-
-// Panel position: how far down from the top of the viewport
-// expanded: almost off-screen, just nav bar visible at bottom
-// compact: halfway, hero visible above
-// content: flush with top, fills the screen
 const PANEL_Y = {
   expanded: "calc(100vh - 7vw)",
   compact: "50vh",
@@ -111,22 +27,9 @@ export function HomePage() {
   const { trailers, rows, thumbnails, loading } = useHomeData();
   const { rows: amazonRows, resolveTrailer } = useAmazonData();
 
-  const [pos, setPos] = useState(INITIAL);
-  const [expanded, setExpanded] = useState(true);
-  const expandedRef = useRef(true);
-  const [trailerIndex, setTrailerIndex] = useState(0);
-  const [selectedNavIndex, setSelectedNavIndex] = useState(HOME_NAV_INDEX);
-
-  const advanceTrailer = useCallback(() => {
-    setTrailerIndex((i) => (i + 1) % Math.max(1, trailers.length));
-  }, [trailers.length]);
-
+  // Build content rows based on selected nav
   const homeContentRows = useMemo(() => {
-    const result: {
-      id: string;
-      title?: string;
-      items: ContentItem[];
-    }[] = [];
+    const result: { id: string; title?: string; items: ContentItem[] }[] = [];
     for (const [id, row] of rows) {
       const thumbs = thumbnails.get(id) ?? {};
       result.push({
@@ -141,127 +44,34 @@ export function HomePage() {
     return result;
   }, [rows, thumbnails]);
 
-  const contentRows = useMemo(() => {
-    const navIdx = pos[0] === 0 ? pos[1] : selectedNavIndex;
-    if (navIdx === HOME_NAV_INDEX) return homeContentRows;
-    const label = ALL_NAV[navIdx]?.label ?? "Unknown";
-    // Use real Amazon data for Prime Video when available
-    if (label === "Prime Video" && amazonRows.length > 0) {
-      return amazonRows;
-    }
-    return generateContentForCategory(label);
-  }, [pos, selectedNavIndex, homeContentRows, amazonRows]);
-
-  const activeNavIndex = pos[0] === 0 ? pos[1] : selectedNavIndex;
-
-  const ROWS = useMemo(
-    () => [
-      NAV_ROW,
-      ...contentRows.map((r) =>
-        Array.from({ length: r.items.length }, (_, i) => ({ id: `t-${i}` })),
-      ),
-    ],
-    [contentRows],
+  // Resolve content rows for the active nav category
+  const contentRowsForNav = useMemo(
+    () => (navIdx: number) => {
+      if (navIdx === HOME_NAV_INDEX) return homeContentRows;
+      const label = ALL_NAV[navIdx]?.label ?? "Unknown";
+      if (label === "Prime Video" && amazonRows.length > 0) return amazonRows;
+      return generateContentForCategory(label);
+    },
+    [homeContentRows, amazonRows],
   );
 
-  const [row, col] = pos;
+  // Row lengths for navigation bounds
+  const maxRowLengths = useMemo(() => {
+    // Use a generous upper bound — actual bounds checked in navigation
+    const maxRows = 30;
+    return [NAV_ROW_LENGTH, ...Array(maxRows).fill(100)];
+  }, []);
 
-  useEffect(() => {
-    const move = (e: KeyboardEvent) => {
-      const key = e.key;
+  const nav = useNavigation(maxRowLengths, trailers.length);
 
-      // H key — go to Home (compact nav with Home selected)
-      if (key === "h" || key === "H") {
-        e.preventDefault();
-        expandedRef.current = false;
-        setExpanded(false);
-        setPos([0, HOME_NAV_INDEX]);
-        setSelectedNavIndex(HOME_NAV_INDEX);
-        return;
-      }
+  // Now compute the actual content rows based on nav state
+  const activeContentRows = useMemo(() => {
+    const navIdx = nav.row === 0 ? nav.col : nav.selectedNavIndex;
+    return contentRowsForNav(navIdx);
+  }, [nav.row, nav.col, nav.selectedNavIndex, contentRowsForNav]);
 
-      // Enter — select current item
-      if (key === "Enter") {
-        e.preventDefault();
-        if (expandedRef.current) {
-          // From expanded, go to compact nav
-          expandedRef.current = false;
-          setExpanded(false);
-          return;
-        }
-        // From nav bar, go into content
-        if (pos[0] === 0) {
-          setSelectedNavIndex(pos[1]);
-          setPos([1, 0]);
-        }
-        return;
-      }
-
-      if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(key))
-        return;
-      e.preventDefault();
-
-      if (key === "ArrowUp") {
-        if (expandedRef.current) return;
-        setPos(([r, c]) => {
-          if (r === 0) {
-            expandedRef.current = true;
-            setExpanded(true);
-            return [r, c];
-          }
-          if (r === 1) return [0, selectedNavIndex];
-          return [r - 1, 0];
-        });
-        return;
-      }
-
-      if (key === "ArrowDown") {
-        if (expandedRef.current) {
-          expandedRef.current = false;
-          setExpanded(false);
-          return;
-        }
-        setPos(([r, c]) => {
-          if (r === 0) {
-            setSelectedNavIndex(c);
-            return [1, 0];
-          }
-          return r < ROWS.length - 1 ? [r + 1, 0] : [r, c];
-        });
-        return;
-      }
-
-      if (expandedRef.current) {
-        if (key === "ArrowLeft")
-          setTrailerIndex((i) => (i - 1 + trailers.length) % trailers.length);
-        else if (key === "ArrowRight")
-          setTrailerIndex((i) => (i + 1) % trailers.length);
-        return;
-      }
-
-      setPos(([r, c]) => {
-        if (key === "ArrowLeft") {
-          const next = Math.max(0, c - 1);
-          if (r === 0 && next !== c) setSelectedNavIndex(next);
-          return [r, next];
-        }
-        if (key === "ArrowRight") {
-          const next = Math.min(ROWS[r].length - 1, c + 1);
-          if (r === 0 && next !== c) setSelectedNavIndex(next);
-          return [r, next];
-        }
-        return [r, c];
-      });
-    };
-
-    window.addEventListener("keydown", move);
-    return () => window.removeEventListener("keydown", move);
-  }, [ROWS, trailers.length, selectedNavIndex]);
-
-  const inContent = row >= 1;
-  const contentRowIndex = row - 1;
-  const selectedRow = contentRows[contentRowIndex];
-  const selectedItem = selectedRow?.items[col] ?? null;
+  const selectedRow = activeContentRows[nav.row - 1];
+  const selectedItem = selectedRow?.items[nav.col] ?? null;
 
   // Resolve trailer video when an item is focused
   useEffect(() => {
@@ -270,10 +80,9 @@ export function HomePage() {
     }
   }, [selectedItem?.id, selectedItem?.videoSrc, resolveTrailer]);
 
-  // Determine panel position
-  const panelY = expanded
+  const panelY = nav.expanded
     ? PANEL_Y.expanded
-    : inContent
+    : nav.inContent
       ? PANEL_Y.content
       : PANEL_Y.compact;
 
@@ -281,32 +90,29 @@ export function HomePage() {
     <div className="home-page">
       <FullscreenToggle />
       <div className="viewport">
-        {/* Hero trailer — always fills the viewport behind the panel */}
         {!loading.trailers && (
           <HeroTrailer
-            expanded={expanded}
+            expanded={nav.expanded}
             trailers={trailers}
-            activeIndex={trailerIndex}
-            onAdvance={advanceTrailer}
+            activeIndex={nav.trailerIndex}
+            onAdvance={nav.advanceTrailer}
             transition={transition}
           />
         )}
 
-        {/* Sliding panel — nav bar + content */}
         <div
           className="panel"
           style={{
             transform: `translateY(${panelY})`,
-            backgroundColor: expanded ? "transparent" : "var(--color-bg)",
+            backgroundColor: nav.expanded ? "transparent" : "var(--color-bg)",
             transition:
               "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
           }}
         >
-          {/* Carousel controls — above the nav bar */}
           <div className="panel__controls">
             <div className="carousel-controls">
               <button
-                className={`carousel-controls__learn-more${expanded ? " carousel-controls__learn-more--active" : ""}`}
+                className={`carousel-controls__learn-more${nav.expanded ? " carousel-controls__learn-more--active" : ""}`}
               >
                 Learn More
               </button>
@@ -314,7 +120,11 @@ export function HomePage() {
                 {[0, 1, 2].map((dot) => {
                   const last = Math.max(0, trailers.length - 1);
                   const activeDot =
-                    trailerIndex === 0 ? 0 : trailerIndex >= last ? 2 : 1;
+                    nav.trailerIndex === 0
+                      ? 0
+                      : nav.trailerIndex >= last
+                        ? 2
+                        : 1;
                   return (
                     <span
                       key={dot}
@@ -326,31 +136,25 @@ export function HomePage() {
             </div>
           </div>
 
-          {/* Detail trailer/image — full height, behind nav bar */}
           <DetailBackground
-            item={inContent ? selectedItem : null}
-            visible={inContent}
+            item={nav.inContent ? selectedItem : null}
+            visible={nav.inContent}
           />
 
-          {/* Nav bar */}
           <NavBar
-            focusedIndex={row === 0 ? col : null}
-            selectedIndex={selectedNavIndex}
-            showBreadcrumb={row >= 2}
-            breadcrumbLabel={ALL_NAV[selectedNavIndex]?.label ?? ""}
-            mode={expanded ? "expanded" : inContent ? "content" : "compact"}
-            onItemClick={(idx) => {
-              expandedRef.current = false;
-              setExpanded(false);
-              setSelectedNavIndex(idx);
-              setPos([0, idx]);
-            }}
+            focusedIndex={nav.row === 0 ? nav.col : null}
+            selectedIndex={nav.selectedNavIndex}
+            showBreadcrumb={nav.row >= 2}
+            breadcrumbLabel={ALL_NAV[nav.selectedNavIndex]?.label ?? ""}
+            mode={
+              nav.expanded ? "expanded" : nav.inContent ? "content" : "compact"
+            }
+            onItemClick={nav.clickNav}
           />
 
-          {/* Content area — detail text + tile rows */}
           <div className="panel__content">
             <AnimatePresence initial={false}>
-              {inContent && (
+              {nav.inContent && (
                 <motion.div
                   key="detail"
                   className="detail-motion-wrapper"
@@ -359,7 +163,7 @@ export function HomePage() {
                   exit={{ height: 0, opacity: 0 }}
                   transition={transition}
                 >
-                  <DetailPanel item={selectedItem} visible={inContent} />
+                  <DetailPanel item={selectedItem} visible={nav.inContent} />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -367,20 +171,13 @@ export function HomePage() {
             <div style={{ position: "relative" }}>
               <AnimatePresence initial={false}>
                 <RowScroller
-                  key={activeNavIndex}
-                  contentRows={contentRows}
-                  focusedRow={row >= 1 ? row - 1 : -1}
-                  focusedCol={col}
-                  inContent={inContent}
-                  scrollToRow={row >= 2 ? row - 1 : -1}
-                  onItemClick={(rowIdx, colIdx) => {
-                    expandedRef.current = false;
-                    setExpanded(false);
-                    setSelectedNavIndex(
-                      pos[0] === 0 ? pos[1] : selectedNavIndex,
-                    );
-                    setPos([rowIdx + 1, colIdx]);
-                  }}
+                  key={nav.activeNavIndex}
+                  contentRows={activeContentRows}
+                  focusedRow={nav.row >= 1 ? nav.row - 1 : -1}
+                  focusedCol={nav.col}
+                  inContent={nav.inContent}
+                  scrollToRow={nav.row >= 2 ? nav.row - 1 : -1}
+                  onItemClick={nav.clickTile}
                 />
               </AnimatePresence>
             </div>
