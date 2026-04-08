@@ -7,6 +7,7 @@ frontend:
     build:
       commands:
         - npm run build
+        - cp userscript/*.user.js dist/
   artifacts:
     baseDirectory: dist
     files:
@@ -14,3 +15,14 @@ frontend:
   cache:
     paths:
       - node_modules/**/*
+  customHeaders:
+    - pattern: "**/*"
+      headers:
+        - key: Access-Control-Allow-Origin
+          value: "*"
+        - key: Access-Control-Allow-Methods
+          value: "GET, OPTIONS"
+    - pattern: "*.user.js"
+      headers:
+        - key: Content-Type
+          value: text/javascript

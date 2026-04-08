@@ -6,6 +6,7 @@
 // @match        https://www.amazon.com/gp/video/storefront/firetv*
 // @grant        GM_xmlhttpRequest
 // @connect      localhost
+// @connect      main.d35b9flhyyxzu1.amplifyapp.com
 // @connect      *
 // @run-at       document-start
 // ==/UserScript==
@@ -14,15 +15,17 @@
   "use strict";
 
   // Determine the server to load from:
-  // 1. ?dev=<host:port> query param → use that as the dev server
-  // 2. Default → http://localhost:5173
+  // 1. ?dev=<host:port> query param → use that as the dev server (enables Vite HMR)
+  // 2. Default → Amplify hosted app
+  var AMPLIFY_URL = "https://main.d35b9flhyyxzu1.amplifyapp.com";
   var params = new URLSearchParams(window.location.search);
   var devParam = params.get("dev");
   var SERVER = devParam
     ? devParam.startsWith("http")
       ? devParam
       : "http://" + devParam
-    : "http://localhost:5173";
+    : AMPLIFY_URL;
+  var IS_DEV = SERVER.includes("localhost") || SERVER.includes("127.0.0.1");
 
   // Strip trailing slash
   if (SERVER.endsWith("/")) SERVER = SERVER.slice(0, -1);
@@ -73,7 +76,7 @@
         document.body.appendChild(root);
 
         // Vite HMR client (only for local dev servers)
-        if (SERVER.includes("localhost") || SERVER.includes("127.0.0.1")) {
+        if (IS_DEV) {
           var viteClient = document.createElement("script");
           viteClient.type = "module";
           viteClient.src = SERVER + "/@vite/client";
