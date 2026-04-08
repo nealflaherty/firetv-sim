@@ -1,0 +1,110 @@
+.controls-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  animation: controls-fade-in 0.3s ease;
+}
+
+@keyframes controls-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.controls-overlay__content {
+  display: flex;
+  align-items: center;
+  gap: 6vw;
+}
+
+.controls-overlay__remote {
+  opacity: 0.3;
+  height: 50vh;
+}
+
+.controls-overlay__remote img {
+  height: 100%;
+  width: auto;
+  filter: brightness(0) invert(1);
+}
+
+.controls-overlay__keys {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.controls-overlay__keys h2 {
+  font-size: 1.8vw;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 2vw;
+  font-family: "Amazon Ember", sans-serif;
+}
+
+.controls-overlay__grid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4vw;
+}
+
+.controls-key-row {
+  display: flex;
+  gap: 0.4vw;
+}
+
+.controls-key {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.2vw;
+  height: 3.2vw;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 0.4vw;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.2vw;
+  font-family:
+    "Amazon Ember",
+    -apple-system,
+    sans-serif;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.controls-key--wide {
+  width: 7vw;
+  font-size: 1vw;
+}
+
+.controls-label {
+  font-size: 0.9vw;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 0.2vw;
+  font-family: "Amazon Ember", sans-serif;
+}
+
+.controls-overlay__dismiss {
+  margin-top: 4vw;
+  font-size: 1.1vw;
+  color: rgba(255, 255, 255, 0.35);
+  font-family: "Amazon Ember", sans-serif;
+  font-weight: 300;
+}
+
+.controls-key--inline {
+  display: inline-flex;
+  width: 1.8vw;
+  height: 1.8vw;
+  font-size: 0.9vw;
+  vertical-align: middle;
+  margin: 0 0.2vw;
+}

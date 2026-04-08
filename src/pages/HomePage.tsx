@@ -11,6 +11,7 @@ import { NavBar } from "../components/NavBar";
 import { DetailPanel, DetailBackground } from "../components/DetailPanel";
 import { RowScroller } from "../components/RowScroller";
 import { FullscreenToggle } from "../components/FullscreenToggle";
+import { ControlsOverlay } from "../components/ControlsOverlay";
 import "./HomePage.css";
 
 const NAV_ROW_LENGTH = ALL_NAV.length;
@@ -88,6 +89,7 @@ export function HomePage() {
 
   return (
     <div className="home-page">
+      <ControlsOverlay />
       <FullscreenToggle />
       <div className="viewport">
         {!loading.trailers && (
