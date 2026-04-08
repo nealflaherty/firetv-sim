@@ -1,18 +1,33 @@
 // ==UserScript==
-// @name         Fire TV Cap
-// @namespace    https://github.com/firetv-cap
-// @version      0.3.0
-// @description  Replace Fire TV storefront with firetv-cap prototype
+// @name         Fire TV Sim
+// @namespace    https://www.amazon.com/gp/video/storefront/firetv
+// @version      0.4.0
+// @description  Replace Fire TV storefront with firetv-sim prototype
 // @match        https://www.amazon.com/gp/video/storefront/firetv*
 // @grant        GM_xmlhttpRequest
 // @connect      localhost
+// @connect      *
 // @run-at       document-start
 // ==/UserScript==
 
 (function () {
   "use strict";
 
-  const DEV_SERVER = "http://localhost:5173";
+  // Determine the server to load from:
+  // 1. ?dev=<host:port> query param → use that as the dev server
+  // 2. Default → http://localhost:5173
+  var params = new URLSearchParams(window.location.search);
+  var devParam = params.get("dev");
+  var SERVER = devParam
+    ? devParam.startsWith("http")
+      ? devParam
+      : "http://" + devParam
+    : "http://localhost:5173";
+
+  // Strip trailing slash
+  if (SERVER.endsWith("/")) SERVER = SERVER.slice(0, -1);
+
+  console.log("[firetv-sim] Loading from: " + SERVER);
 
   // Stop the original page from rendering
   window.stop();
@@ -20,10 +35,10 @@
   function init() {
     GM_xmlhttpRequest({
       method: "GET",
-      url: DEV_SERVER + "/",
+      url: SERVER + "/",
       onload: function (response) {
         if (response.status !== 200) {
-          showError("Dev server returned status " + response.status);
+          showError("Server returned status " + response.status);
           return;
         }
 
@@ -35,9 +50,9 @@
         document.head.innerHTML = "";
         document.body.innerHTML = "";
 
-        // Base tag so relative URLs resolve to the dev server
+        // Base tag so relative URLs resolve to the server
         var base = document.createElement("base");
-        base.href = DEV_SERVER + "/";
+        base.href = SERVER + "/";
         document.head.appendChild(base);
 
         // Copy meta tags
@@ -57,11 +72,13 @@
         root.id = "root";
         document.body.appendChild(root);
 
-        // Vite HMR client
-        var viteClient = document.createElement("script");
-        viteClient.type = "module";
-        viteClient.src = DEV_SERVER + "/@vite/client";
-        document.head.appendChild(viteClient);
+        // Vite HMR client (only for local dev servers)
+        if (SERVER.includes("localhost") || SERVER.includes("127.0.0.1")) {
+          var viteClient = document.createElement("script");
+          viteClient.type = "module";
+          viteClient.src = SERVER + "/@vite/client";
+          document.head.appendChild(viteClient);
+        }
 
         // Main scripts
         var scripts = doc.querySelectorAll('script[type="module"]');
@@ -69,7 +86,7 @@
           var newScript = document.createElement("script");
           newScript.type = "module";
           if (script.src) {
-            var url = new URL(script.getAttribute("src"), DEV_SERVER);
+            var url = new URL(script.getAttribute("src"), SERVER);
             newScript.src = url.href;
           } else if (script.textContent) {
             newScript.textContent = script.textContent;
@@ -81,9 +98,11 @@
         style.textContent =
           "* { margin: 0; padding: 0; box-sizing: border-box; }";
         document.head.appendChild(style);
+
+        console.log("[firetv-sim] Loaded from " + SERVER);
       },
       onerror: function () {
-        showError("Could not connect to dev server at " + DEV_SERVER);
+        showError("Could not connect to server at " + SERVER);
       },
     });
   }
@@ -94,7 +113,10 @@
       "<p>" +
       msg +
       "</p>" +
-      '<p style="margin-top:1em">Make sure the dev server is running: <code>npm run dev</code></p>' +
+      '<p style="margin-top:1em">Server: <code>' +
+      SERVER +
+      "</code></p>" +
+      '<p style="margin-top:0.5em;font-size:0.9em;color:#666">Use <code>?dev=host:port</code> to specify a different server</p>' +
       "</body>";
   }
 
