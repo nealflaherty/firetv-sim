@@ -5,6 +5,7 @@ import {
   enrichItemMetadata,
   fetchAmazonStorefront,
   inspectAsinInDom,
+  resolvePlaybackUrl,
 } from "../lib/amazonService";
 import "./DebugPage.css";
 
@@ -315,6 +316,51 @@ export function DebugPage() {
           disabled={!!loading}
         >
           {loading === "inspect" ? "Inspecting…" : "Inspect ASIN DOM"}
+        </button>
+
+        <button
+          onClick={async () => {
+            const id = asinInput.trim().split(/[\s,]+/)[0];
+            if (!id) {
+              addLog("Enter an ASIN first");
+              return;
+            }
+            setLoading("trailer");
+            try {
+              // First enrich to get the trailer envelope
+              const enriched = await enrichItemMetadata({ titleIds: [id] });
+              const e = enriched[0];
+              if (!e?.trailer?.playbackEnvelope) {
+                addLog(`No trailer envelope for ${id}`, e);
+                showData("Enrich result (no trailer)", e);
+                setLoading("");
+                return;
+              }
+              addLog(`Got trailer envelope for ${id}, resolving...`, {
+                correlationId: e.trailer.correlationId,
+                playbackURL: e.trailer.playbackURL,
+                videoMaterialType: e.trailer.videoMaterialType,
+                envelopeLength: e.trailer.playbackEnvelope.length,
+              });
+              const url = await resolvePlaybackUrl(
+                e.trailer.playbackEnvelope,
+                e.trailer.playbackID ?? id,
+              );
+              if (url) {
+                addLog(`Resolved trailer URL for ${id}`, { url });
+                showData("Trailer URL", { asin: id, url, trailer: e.trailer });
+              } else {
+                addLog(`Could not resolve trailer URL for ${id}`);
+                showData("Trailer data (unresolved)", e.trailer);
+              }
+            } catch (err) {
+              addLog(`Error: ${err}`);
+            }
+            setLoading("");
+          }}
+          disabled={!!loading}
+        >
+          {loading === "trailer" ? "Resolving…" : "Resolve Trailer"}
         </button>
       </div>
 

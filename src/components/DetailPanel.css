@@ -15,13 +15,12 @@
   opacity: 1;
 }
 
-/* Background image — blurred, positioned right, fades via radial mask */
+/* Background image — positioned right, fades via radial mask */
 .detail-panel__bg {
   position: absolute;
   inset: 0;
   background-size: cover;
-  background-position: center;
-  filter: blur(8px);
+  background-position: center right;
   mask-image: radial-gradient(
     circle at 100% 0%,
     rgba(0, 0, 0, 0.6) 0%,
@@ -31,6 +30,29 @@
     circle at 100% 0%,
     rgba(0, 0, 0, 0.6) 0%,
     transparent 50%
+  );
+  pointer-events: none;
+}
+
+/* Trailer video — positioned right, fades via same radial mask */
+.detail-panel__video {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 60%;
+  height: 100%;
+  object-fit: cover;
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(0, 0, 0, 0.5) 30%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(0, 0, 0, 0.5) 30%,
+    rgba(0, 0, 0, 0.8) 100%
   );
   pointer-events: none;
 }

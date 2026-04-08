@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ContentItem } from "./types";
 import {
   isAmazonContext,
   fetchStorefrontHtml,
   enrichItemMetadata,
-  fetchTitlesForAsins,
+  resolvePlaybackUrl,
 } from "./amazonService";
 
 export interface AmazonRow {
@@ -13,12 +13,21 @@ export interface AmazonRow {
   items: ContentItem[];
 }
 
+// Cache trailer envelopes from enrichment (titleID → { envelope, playbackID })
+interface TrailerInfo {
+  playbackEnvelope: string;
+  playbackID: string;
+}
+
 export function useAmazonData(): {
   rows: AmazonRow[];
   loading: boolean;
+  resolveTrailer: (titleId: string) => Promise<string | null>;
 } {
   const [rows, setRows] = useState<AmazonRow[]>([]);
   const [loading, setLoading] = useState(false);
+  const trailerCache = useRef(new Map<string, TrailerInfo>());
+  const resolvedUrls = useRef(new Map<string, string | null>());
 
   useEffect(() => {
     if (!isAmazonContext()) return;
@@ -31,7 +40,6 @@ export function useAmazonData(): {
         const { widgets } = await fetchStorefrontHtml();
         if (cancelled) return;
 
-        // Map widgets to rows with basic info
         const initial: AmazonRow[] = widgets
           .filter((w) => (w.items?.length ?? 0) > 0)
           .map((w, i) => ({
@@ -46,7 +54,6 @@ export function useAmazonData(): {
 
         setRows(initial);
 
-        // Enrich in batches
         const allIds = new Set<string>();
         for (const r of initial)
           for (const item of r.items)
@@ -64,6 +71,21 @@ export function useAmazonData(): {
             if (enriched.length === 0) continue;
 
             const enrichMap = new Map(enriched.map((e) => [e.titleID, e]));
+
+            // Cache trailer envelopes
+            for (const e of enriched) {
+              if (
+                e.titleID &&
+                e.trailer?.playbackEnvelope &&
+                e.trailer?.playbackID
+              ) {
+                trailerCache.current.set(e.titleID, {
+                  playbackEnvelope: e.trailer.playbackEnvelope,
+                  playbackID: e.trailer.playbackID,
+                });
+              }
+            }
+
             setRows((prev) =>
               prev.map((row) => ({
                 ...row,
@@ -105,5 +127,44 @@ export function useAmazonData(): {
     };
   }, []);
 
-  return { rows, loading };
+  // Resolve a trailer URL on demand, with caching
+  const resolveTrailer = useCallback(
+    async (titleId: string): Promise<string | null> => {
+      // Check resolved cache first
+      if (resolvedUrls.current.has(titleId)) {
+        return resolvedUrls.current.get(titleId) ?? null;
+      }
+
+      const info = trailerCache.current.get(titleId);
+      if (!info) return null;
+
+      try {
+        const url = await resolvePlaybackUrl(
+          info.playbackEnvelope,
+          info.playbackID,
+        );
+        resolvedUrls.current.set(titleId, url);
+
+        // Update the item's videoSrc in rows
+        if (url) {
+          setRows((prev) =>
+            prev.map((row) => ({
+              ...row,
+              items: row.items.map((item) =>
+                item.id === titleId ? { ...item, videoSrc: url } : item,
+              ),
+            })),
+          );
+        }
+
+        return url;
+      } catch {
+        resolvedUrls.current.set(titleId, null);
+        return null;
+      }
+    },
+    [],
+  );
+
+  return { rows, loading, resolveTrailer };
 }

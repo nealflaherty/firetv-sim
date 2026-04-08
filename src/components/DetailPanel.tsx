@@ -1,5 +1,6 @@
 import { useRef, useEffect } from "react";
 import { motion } from "framer-motion";
+import * as dashjs from "dashjs";
 import type { ContentItem } from "../lib/types";
 import "./DetailPanel.css";
 
@@ -43,25 +44,83 @@ const lineVariants = {
 
 export function DetailPanel({ item, visible }: Props) {
   const wasVisible = useRef(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const dashRef = useRef<dashjs.MediaPlayerClass | null>(null);
 
   useEffect(() => {
     wasVisible.current = visible;
   }, [visible]);
 
-  // If panel was already open, no delay; if just opening, wait for expand
+  // Manage DASH playback
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const src = visible && item?.videoSrc ? item.videoSrc : "";
+    const isDash = src.endsWith(".mpd") || src.includes(".mpd?");
+
+    // Clean up previous dash player
+    if (dashRef.current) {
+      dashRef.current.reset();
+      dashRef.current = null;
+    }
+
+    if (!src) {
+      video.pause();
+      video.removeAttribute("src");
+      video.load();
+      return;
+    }
+
+    if (isDash) {
+      const player = dashjs.MediaPlayer().create();
+      player.initialize(video, src, true);
+      player.updateSettings({
+        streaming: { buffer: { fastSwitchEnabled: true } },
+      });
+      dashRef.current = player;
+    } else {
+      video.src = src;
+      video.play().catch(() => {});
+    }
+
+    return () => {
+      if (dashRef.current) {
+        dashRef.current.reset();
+        dashRef.current = null;
+      }
+    };
+  }, [item?.id, item?.videoSrc, visible]);
+
   const delay = wasVisible.current ? 0 : 0.35;
+  const hasVideo = visible && !!item?.videoSrc;
+
+  // Generate a higher-res hero image from the thumbnail URL
+  const heroImage = item?.thumbnail
+    ? item.thumbnail
+        .replace(/_SX\d+/, "_SX1280")
+        .replace(/_UR\d+,\d+/, "_UR1920,1080")
+    : null;
 
   return (
     <div
       className={`detail-panel-wrapper${visible ? " detail-panel-wrapper--open" : ""}`}
     >
       <div className="detail-panel">
-        {item?.thumbnail && (
+        {/* Background image — shown when no video is playing */}
+        {heroImage && !hasVideo && (
           <div
             className="detail-panel__bg"
-            style={{ backgroundImage: `url(${item.thumbnail})` }}
+            style={{ backgroundImage: `url(${heroImage})` }}
           />
         )}
+        {/* Trailer video — single persistent element, src managed by effect */}
+        <video
+          ref={videoRef}
+          className="detail-panel__video"
+          style={{ display: hasVideo ? undefined : "none" }}
+          playsInline
+        />
         <motion.div
           className="detail-panel__content"
           key={item?.id}

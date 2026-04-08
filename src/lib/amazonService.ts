@@ -56,6 +56,13 @@ interface EnrichedItem {
   trailer?: {
     correlationId?: string;
     playbackEnvelope?: string;
+    playbackURL?: string;
+    playbackID?: string;
+    videoMaterialType?: string;
+  };
+  prerollsEnvelope?: {
+    playbackEnvelope?: string;
+    playbackId?: string;
   };
   watchlistAction?: {
     endpoint?: string;
@@ -741,6 +748,109 @@ export async function fetchTitlesForAsins(
 
   await Promise.all(Array.from({ length: CONCURRENCY }, () => worker()));
   return titles;
+}
+
+/**
+ * Resolve a playback envelope to a direct video URL via GetVodPlaybackResources.
+ * Returns the highest-quality MP4 URL or null if resolution fails.
+ */
+export async function resolvePlaybackUrl(
+  playbackEnvelope: string,
+  titleId: string,
+): Promise<string | null> {
+  try {
+    const params = new URLSearchParams({
+      deviceID: crypto.randomUUID(),
+      deviceTypeID: "AOAGZA014O5RE",
+      gascEnabled: "false",
+      marketplaceID: "ATVPDKIKX0DER",
+      uxLocale: "en_US",
+      firmware: "1",
+      titleId,
+    });
+
+    const body = {
+      globalParameters: {
+        deviceCapabilityFamily: "WebPlayer",
+        playbackEnvelope,
+        capabilityDiscriminators: {
+          operatingSystem: { name: "Mac OS X", version: "10.15.7" },
+          middleware: { name: "Chrome", version: "130.0.0.0" },
+          nativeApplication: { name: "Chrome", version: "130.0.0.0" },
+          hfrControlMode: "Legacy",
+          displayResolution: { height: 1080, width: 1920 },
+        },
+      },
+      vodPlaylistedPlaybackUrlsRequest: {
+        device: {
+          maxVideoResolution: "1080p",
+          supportedStreamingTechnologies: ["DASH"],
+          streamingTechnologies: {
+            DASH: {
+              bitrateAdaptations: ["CBR", "CVBR"],
+              codecs: ["H264"],
+              drmKeyScheme: "DualKey",
+              drmType: "Widevine",
+              dynamicRangeFormats: ["None"],
+              edgeDeliveryAuthorizationSchemes: ["PVExchangeV1", "Transparent"],
+              fragmentRepresentations: ["ByteOffsetRange", "SeparateFile"],
+              frameRates: ["Standard"],
+              segmentInfoType: "Base",
+              timedTextRepresentations: ["NotInManifestNorStream"],
+              trickplayRepresentations: ["NotInManifestNorStream"],
+            },
+          },
+          displayWidth: 1920,
+          displayHeight: 1080,
+        },
+        ads: { sitePageUrl: "https://www.amazon.com/gp/video/storefront" },
+        playbackCustomizations: {},
+        playbackSettingsRequest: {
+          firmware: "UNKNOWN",
+          playerType: "xp",
+          responseFormatVersion: "1.0.0",
+          titleId,
+        },
+      },
+    };
+
+    const resp = await fetch(
+      `https://atv-ps.amazon.com/playback/prs/GetVodPlaybackResources?${params}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(body),
+      },
+    );
+
+    if (!resp.ok) {
+      console.warn(
+        `[amazonService] GetVodPlaybackResources failed: ${resp.status}`,
+      );
+      return null;
+    }
+
+    const data = await resp.json();
+    console.log("[amazonService] GetVodPlaybackResources response:", data);
+
+    // Extract the DASH manifest URL from the response
+    const playlist =
+      data?.vodPlaylistedPlaybackUrls?.result?.playbackUrls?.intraTitlePlaylist;
+    if (!Array.isArray(playlist) || playlist.length === 0) return null;
+
+    const mainEntry =
+      playlist.find((e: Record<string, unknown>) => e.type === "Main") ??
+      playlist[0];
+    const manifestUrl = (mainEntry?.urls as { url: string }[])?.[0]?.url;
+    if (!manifestUrl) return null;
+
+    // Return the DASH manifest URL — use dash.js to play it with audio+video
+    return manifestUrl;
+  } catch (err) {
+    console.warn("[amazonService] resolvePlaybackUrl error:", err);
+    return null;
+  }
 }
 
 export async function enrichItemMetadata(

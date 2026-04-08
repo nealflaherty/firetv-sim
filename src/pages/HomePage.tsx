@@ -4,6 +4,7 @@ import { ALL_NAV } from "../layout";
 import { useHomeData } from "../lib/useHomeData";
 import { useAmazonData } from "../lib/useAmazonData";
 import { generateContentForCategory } from "../lib/placeholderContent";
+import type { ContentItem } from "../lib/types";
 import { HeroTrailer } from "../components/HeroTrailer";
 import { NavBar } from "../components/NavBar";
 import { DetailPanel } from "../components/DetailPanel";
@@ -17,6 +18,80 @@ const INITIAL: [number, number] = [0, HOME_NAV_INDEX];
 
 const transition = { duration: 0.6, ease: [0.4, 0, 0.2, 1] as const };
 
+// Extracted component that measures row positions for precise scrolling
+function RowScroller({
+  contentRows,
+  focusedRow,
+  focusedCol,
+  inContent,
+  scrollToRow,
+}: {
+  contentRows: { id: string; title?: string; items: ContentItem[] }[];
+  focusedRow: number;
+  focusedCol: number;
+  inContent: boolean;
+  scrollToRow: number;
+}) {
+  const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    if (scrollToRow < 0) {
+      setScrollY(0);
+      return;
+    }
+    const el = rowRefs.current[scrollToRow];
+    if (el) {
+      // offsetTop relative to the scroll container
+      setScrollY(-el.offsetTop);
+    }
+  }, [scrollToRow]);
+
+  return (
+    <motion.div
+      className="tile-scroll"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1, y: scrollY }}
+      exit={{ opacity: 0, position: "absolute" as const, inset: 0 }}
+      transition={{
+        opacity: { duration: 0.15, ease: [0.4, 0, 0.2, 1] },
+        y: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
+      }}
+    >
+      {contentRows.map((cr, i) => {
+        const isFocusedRow = focusedRow === i;
+        return (
+          <div
+            key={cr.id}
+            ref={(el) => {
+              rowRefs.current[i] = el;
+            }}
+            style={{
+              position: "relative",
+              zIndex: isFocusedRow ? 10 : 1,
+              opacity: scrollToRow >= 0 && i < scrollToRow ? 0 : 1,
+              transition: "opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
+            }}
+          >
+            {cr.title && (
+              <div
+                className={`tile-section-title${isFocusedRow ? " tile-section-title--focused" : ""}`}
+              >
+                {cr.title}
+              </div>
+            )}
+            <TileRow
+              items={cr.items}
+              focusedIndex={isFocusedRow ? focusedCol : null}
+              expanded={inContent}
+            />
+          </div>
+        );
+      })}
+    </motion.div>
+  );
+}
+
 // Panel position: how far down from the top of the viewport
 // expanded: almost off-screen, just nav bar visible at bottom
 // compact: halfway, hero visible above
@@ -29,7 +104,7 @@ const PANEL_Y = {
 
 export function HomePage() {
   const { trailers, rows, thumbnails, loading } = useHomeData();
-  const { rows: amazonRows } = useAmazonData();
+  const { rows: amazonRows, resolveTrailer } = useAmazonData();
 
   const [pos, setPos] = useState(INITIAL);
   const [expanded, setExpanded] = useState(true);
@@ -45,7 +120,7 @@ export function HomePage() {
     const result: {
       id: string;
       title?: string;
-      items: { id: string; title: string; thumbnail?: string }[];
+      items: ContentItem[];
     }[] = [];
     for (const [id, row] of rows) {
       const thumbs = thumbnails.get(id) ?? {};
@@ -183,6 +258,13 @@ export function HomePage() {
   const selectedRow = contentRows[contentRowIndex];
   const selectedItem = selectedRow?.items[col] ?? null;
 
+  // Resolve trailer video when an item is focused
+  useEffect(() => {
+    if (selectedItem?.id && !selectedItem.videoSrc && resolveTrailer) {
+      resolveTrailer(selectedItem.id);
+    }
+  }, [selectedItem?.id, selectedItem?.videoSrc, resolveTrailer]);
+
   // Determine panel position
   const panelY = expanded
     ? PANEL_Y.expanded
@@ -267,51 +349,14 @@ export function HomePage() {
 
             <div style={{ position: "relative" }}>
               <AnimatePresence initial={false}>
-                <motion.div
+                <RowScroller
                   key={activeNavIndex}
-                  className="tile-scroll"
-                  initial={{ opacity: 0 }}
-                  animate={{
-                    opacity: 1,
-                    y:
-                      row >= 2
-                        ? `calc(${-(row - 1)} * (100% / ${contentRows.length} + 1vw))`
-                        : "0%",
-                  }}
-                  exit={{ opacity: 0, position: "absolute" as const, inset: 0 }}
-                  transition={{
-                    opacity: { duration: 0.15, ease: [0.4, 0, 0.2, 1] },
-                    y: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
-                  }}
-                >
-                  {contentRows.map((cr, i) => {
-                    const isFocusedRow = row === i + 1;
-                    return (
-                      <motion.div
-                        key={cr.id}
-                        animate={{ opacity: row >= 2 && i < row - 1 ? 0 : 1 }}
-                        transition={transition}
-                        style={{
-                          position: "relative",
-                          zIndex: isFocusedRow ? 10 : 1,
-                        }}
-                      >
-                        {"title" in cr && cr.title && (
-                          <div
-                            className={`tile-section-title${isFocusedRow ? " tile-section-title--focused" : ""}`}
-                          >
-                            {cr.title}
-                          </div>
-                        )}
-                        <TileRow
-                          items={cr.items}
-                          focusedIndex={isFocusedRow ? col : null}
-                          expanded={inContent}
-                        />
-                      </motion.div>
-                    );
-                  })}
-                </motion.div>
+                  contentRows={contentRows}
+                  focusedRow={row >= 1 ? row - 1 : -1}
+                  focusedCol={col}
+                  inContent={inContent}
+                  scrollToRow={row >= 2 ? row - 1 : -1}
+                />
               </AnimatePresence>
             </div>
           </div>
