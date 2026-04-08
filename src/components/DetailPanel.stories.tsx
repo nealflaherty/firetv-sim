@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { DetailPanel } from "./DetailPanel";
+import { DetailPanel, DetailBackground } from "./DetailPanel";
 import type { ContentItem } from "../lib/types";
 
 const sampleItem: ContentItem = {
@@ -23,12 +23,14 @@ const minimalItem: ContentItem = {
   description: "Blaze and his driver AJ have adventures in Axle City.",
 };
 
-const meta = {
+// --- DetailPanel stories ---
+
+const panelMeta = {
   title: "Components/DetailPanel",
   component: DetailPanel,
   parameters: { layout: "fullscreen" },
   decorators: [
-    (Story) => (
+    (Story: React.ComponentType) => (
       <div style={{ width: "100%", background: "#1a1a1a", minHeight: "40vh" }}>
         <Story />
       </div>
@@ -36,21 +38,53 @@ const meta = {
   ],
 } satisfies Meta<typeof DetailPanel>;
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default panelMeta;
+type PanelStory = StoryObj<typeof panelMeta>;
 
-export const FullMetadata: Story = {
+export const FullMetadata: PanelStory = {
   args: { item: sampleItem, visible: true },
 };
 
-export const MinimalMetadata: Story = {
+export const MinimalMetadata: PanelStory = {
   args: { item: minimalItem, visible: true },
 };
 
-export const Closed: Story = {
+export const Closed: PanelStory = {
   args: { item: sampleItem, visible: false },
 };
 
-export const NoItem: Story = {
+export const NoItem: PanelStory = {
   args: { item: null, visible: true },
+};
+
+// --- DetailBackground stories (separate file would be cleaner but kept here for co-location) ---
+
+export const BackgroundWithImage: PanelStory = {
+  render: () => (
+    <div
+      style={{
+        position: "relative",
+        width: "100%",
+        height: "50vh",
+        background: "#1a1a1a",
+      }}
+    >
+      <DetailBackground item={sampleItem} visible={true} />
+    </div>
+  ),
+};
+
+export const BackgroundHidden: PanelStory = {
+  render: () => (
+    <div
+      style={{
+        position: "relative",
+        width: "100%",
+        height: "50vh",
+        background: "#1a1a1a",
+      }}
+    >
+      <DetailBackground item={sampleItem} visible={false} />
+    </div>
+  ),
 };

@@ -26,22 +26,36 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const HomeFocused: Story = {
-  args: { focusedIndex: 4 },
+export const CompactHomeFocused: Story = {
+  args: { focusedIndex: 4, mode: "compact" },
 };
 
-export const NetflixFocused: Story = {
-  args: { focusedIndex: 6 },
+export const CompactNetflixFocused: Story = {
+  args: { focusedIndex: 6, mode: "compact" },
+};
+
+export const ContentWithSelection: Story = {
+  args: { focusedIndex: null, selectedIndex: 4, mode: "content" },
+};
+
+export const ContentPrimeSelected: Story = {
+  args: { focusedIndex: null, selectedIndex: 7, mode: "content" },
+};
+
+export const Expanded: Story = {
+  args: { focusedIndex: 4, mode: "expanded" },
+};
+
+export const BreadcrumbMode: Story = {
+  args: {
+    focusedIndex: null,
+    selectedIndex: 7,
+    showBreadcrumb: true,
+    breadcrumbLabel: "Prime Video",
+    mode: "content",
+  },
 };
 
 export const NoFocus: Story = {
-  args: { focusedIndex: null },
-};
-
-export const Breadcrumb: Story = {
-  args: { focusedIndex: null, showBreadcrumb: true },
-};
-
-export const Translucent: Story = {
-  args: { focusedIndex: 4, translucent: true },
+  args: { focusedIndex: null, mode: "compact" },
 };
