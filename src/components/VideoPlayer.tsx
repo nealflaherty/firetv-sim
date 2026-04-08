@@ -20,7 +20,9 @@ export function VideoPlayer({ titleId, url, onClose }: Props) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [loading, setLoading] = useState(true);
   const [mouseActive, setMouseActive] = useState(false);
-  const hideTimer = useRef<ReturnType<typeof setTimeout>>();
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
 
   const playerUrl = url
     ? url

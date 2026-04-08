@@ -60,6 +60,7 @@ export const NoItem: PanelStory = {
 // --- DetailBackground stories (separate file would be cleaner but kept here for co-location) ---
 
 export const BackgroundWithImage: PanelStory = {
+  args: { item: sampleItem, visible: true },
   render: () => (
     <div
       style={{
@@ -75,6 +76,7 @@ export const BackgroundWithImage: PanelStory = {
 };
 
 export const BackgroundHidden: PanelStory = {
+  args: { item: sampleItem, visible: false },
   render: () => (
     <div
       style={{

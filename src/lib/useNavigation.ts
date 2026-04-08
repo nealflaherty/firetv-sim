@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ALL_NAV } from "../layout";
 import { HOME_NAV_INDEX } from "./constants";
 const INITIAL: [number, number] = [0, HOME_NAV_INDEX];
 
@@ -72,7 +71,7 @@ export function useNavigation(
   const clickTile = useCallback(
     (rowIdx: number, colIdx: number) => {
       setExpanded(false);
-      setPos((prev) => {
+      setPos((_prev) => {
         // Preserve selectedNavIndex from current state
         return [rowIdx + 1, colIdx];
       });
