@@ -17,6 +17,14 @@ export function InstallBanner() {
         <a href={USERSCRIPT_URL} target="_blank" rel="noopener noreferrer">
           Fire TV Sim userscript
         </a>{" "}
+        then visit{" "}
+        <a
+          href="https://www.amazon.com/gp/video/storefront/firetv"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          amazon.com/gp/video/storefront/firetv
+        </a>{" "}
         for the best experience with live Amazon data.
       </span>
       <button
