@@ -63,7 +63,7 @@ export function ControlsOverlay() {
               </div>
               <div className="controls-action-row">
                 <span className="controls-key">B</span>
-                <span className="controls-label">Back (in player)</span>
+                <span className="controls-label">Back</span>
               </div>
               <div className="controls-action-row">
                 <span className="controls-key">F</span>

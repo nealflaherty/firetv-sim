@@ -93,6 +93,28 @@ export function useNavigation(
         return;
       }
 
+      // Back key
+      if (key === "b" || key === "B") {
+        e.preventDefault();
+        if (expandedRef.current) {
+          // In expanded hero — collapse and go to nav
+          setExpanded(false);
+          return;
+        }
+        if (pos[0] >= 1 && pos[1] > 0) {
+          // On a tile row, not first item → go to first item
+          setPos([pos[0], 0]);
+        } else if (pos[0] >= 1 && pos[1] === 0) {
+          // On first item of a tile row → go to nav bar (collapsed hero)
+          setPos([0, selectedNavIndex]);
+        } else if (pos[0] === 0 && selectedNavIndex !== HOME_NAV_INDEX) {
+          // On nav bar, not Home → go to Home
+          setSelectedNavIndex(HOME_NAV_INDEX);
+          setPos([0, HOME_NAV_INDEX]);
+        }
+        return;
+      }
+
       if (key === "Enter") {
         e.preventDefault();
         if (expandedRef.current) {
