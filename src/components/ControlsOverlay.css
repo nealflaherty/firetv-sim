@@ -51,11 +51,39 @@
   font-family: "Amazon Ember", sans-serif;
 }
 
-.controls-overlay__grid {
+/* Two-column layout */
+.controls-overlay__columns {
+  display: flex;
+  gap: 5vw;
+  align-items: flex-start;
+}
+
+.controls-overlay__col {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.4vw;
+}
+
+.controls-overlay__col:last-child {
+  align-items: flex-start;
+}
+
+/* Action rows: key + label side by side */
+.controls-action-row {
+  display: flex;
+  align-items: center;
+  gap: 1vw;
+  margin-top: 0.6vw;
+}
+
+.controls-action-row:first-child {
+  margin-top: 0;
+}
+
+.controls-action-row .controls-label {
+  margin-top: 0;
+  white-space: nowrap;
 }
 
 .controls-key-row {

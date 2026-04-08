@@ -14,6 +14,9 @@ export interface NavigationState {
   inContent: boolean;
 }
 
+/** Callback fired when the user presses Enter on a content tile */
+export type OnPlayCallback = (row: number, col: number) => void;
+
 export interface NavigationActions {
   setPos: (
     pos: [number, number] | ((prev: [number, number]) => [number, number]),
@@ -30,6 +33,7 @@ export interface NavigationActions {
 export function useNavigation(
   rowLengths: number[],
   trailerCount: number,
+  onPlay?: OnPlayCallback,
 ): NavigationState & NavigationActions {
   const [pos, setPos] = useState(INITIAL);
   const [expanded, setExpandedState] = useState(true);
@@ -98,6 +102,9 @@ export function useNavigation(
         if (pos[0] === 0) {
           setSelectedNavIndex(pos[1]);
           setPos([1, 0]);
+        } else if (pos[0] >= 1 && onPlay) {
+          // Content row — trigger playback
+          onPlay(pos[0] - 1, pos[1]);
         }
         return;
       }
@@ -159,7 +166,15 @@ export function useNavigation(
 
     window.addEventListener("keydown", move);
     return () => window.removeEventListener("keydown", move);
-  }, [rowLengths, trailerCount, selectedNavIndex, goHome, setExpanded, pos]);
+  }, [
+    rowLengths,
+    trailerCount,
+    selectedNavIndex,
+    goHome,
+    setExpanded,
+    pos,
+    onPlay,
+  ]);
 
   return {
     pos,

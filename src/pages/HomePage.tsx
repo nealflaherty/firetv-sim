@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ALL_NAV } from "../layout";
 import { useHomeData } from "../lib/useHomeData";
@@ -12,6 +12,7 @@ import { DetailPanel, DetailBackground } from "../components/DetailPanel";
 import { RowScroller } from "../components/RowScroller";
 import { FullscreenToggle } from "../components/FullscreenToggle";
 import { ControlsOverlay } from "../components/ControlsOverlay";
+import { VideoPlayer } from "../components/VideoPlayer";
 import "./HomePage.css";
 
 const NAV_ROW_LENGTH = ALL_NAV.length;
@@ -63,13 +64,29 @@ export function HomePage() {
     return [NAV_ROW_LENGTH, ...Array(maxRows).fill(100)];
   }, []);
 
-  const nav = useNavigation(maxRowLengths, trailers.length);
+  // --- Video player state ---
+  const [playingTitleId, setPlayingTitleId] = useState<string | null>(null);
+  const contentRowsRef = useRef<
+    { id: string; title?: string; items: ContentItem[] }[]
+  >([]);
+
+  const handlePlay = useCallback((rowIdx: number, colIdx: number) => {
+    const item = contentRowsRef.current[rowIdx]?.items[colIdx];
+    if (item?.id) setPlayingTitleId(item.id);
+  }, []);
+
+  const nav = useNavigation(maxRowLengths, trailers.length, handlePlay);
 
   // Now compute the actual content rows based on nav state
   const activeContentRows = useMemo(() => {
     const navIdx = nav.row === 0 ? nav.col : nav.selectedNavIndex;
     return contentRowsForNav(navIdx);
   }, [nav.row, nav.col, nav.selectedNavIndex, contentRowsForNav]);
+
+  // Keep ref in sync for the play callback
+  useEffect(() => {
+    contentRowsRef.current = activeContentRows;
+  }, [activeContentRows]);
 
   const selectedRow = activeContentRows[nav.row - 1];
   const selectedItem = selectedRow?.items[nav.col] ?? null;
@@ -91,6 +108,10 @@ export function HomePage() {
     <div className="home-page">
       <ControlsOverlay />
       <FullscreenToggle />
+      <VideoPlayer
+        titleId={playingTitleId}
+        onClose={() => setPlayingTitleId(null)}
+      />
       <div className="viewport">
         {!loading.trailers && (
           <HeroTrailer
@@ -139,8 +160,8 @@ export function HomePage() {
           </div>
 
           <DetailBackground
-            item={nav.inContent ? selectedItem : null}
-            visible={nav.inContent}
+            item={nav.inContent && !playingTitleId ? selectedItem : null}
+            visible={nav.inContent && !playingTitleId}
           />
 
           <NavBar

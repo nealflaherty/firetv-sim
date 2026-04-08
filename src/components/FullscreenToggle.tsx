@@ -67,6 +67,15 @@ export function FullscreenToggle() {
     <div className={`toolbar${visible ? "" : " toolbar--hidden"}`}>
       <button
         className="toolbar__btn"
+        onClick={() =>
+          window.dispatchEvent(new KeyboardEvent("keydown", { key: "?" }))
+        }
+        title="Show controls (?)"
+      >
+        ?
+      </button>
+      <button
+        className="toolbar__btn"
         onClick={toggleTheme}
         title={`${isDark ? "Light" : "Dark"} theme (T)`}
       >
