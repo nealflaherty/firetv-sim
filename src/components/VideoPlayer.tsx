@@ -5,23 +5,28 @@ import "./VideoPlayer.css";
 interface Props {
   /** ASIN / titleID to play, or null to hide */
   titleId: string | null;
+  /** Optional custom URL to load instead of the default video player URL */
+  url?: string | null;
   onClose: () => void;
 }
 
 /**
- * Full-screen iframe overlay that loads Amazon's video player page.
+ * Full-screen iframe overlay that loads Amazon's video player page
+ * or a custom URL (e.g. Luna game detail page).
  * Since the userscript runs on amazon.com we're same-origin,
  * so X-Frame-Options: SAMEORIGIN won't block us.
  */
-export function VideoPlayer({ titleId, onClose }: Props) {
+export function VideoPlayer({ titleId, url, onClose }: Props) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [loading, setLoading] = useState(true);
   const [mouseActive, setMouseActive] = useState(false);
   const hideTimer = useRef<ReturnType<typeof setTimeout>>();
 
-  const playerUrl = titleId
-    ? `${AMAZON_ORIGIN}/gp/video/detail/${titleId}/ref=atv_dp_atf_est_uhd_mv_wfb_t1ADAAAAAA0wr0?autoplay=1&t=0`
-    : null;
+  const playerUrl = url
+    ? url
+    : titleId
+      ? `${AMAZON_ORIGIN}/gp/video/detail/${titleId}/ref=atv_dp_atf_est_uhd_mv_wfb_t1ADAAAAAA0wr0?autoplay=1&t=0`
+      : null;
 
   // Dismiss on Escape or Backspace
   const handleKey = useCallback(
@@ -54,6 +59,15 @@ export function VideoPlayer({ titleId, onClose }: Props) {
           iframe?.contentDocument ?? iframe?.contentWindow?.document;
         if (iframeDoc) {
           iframeDoc.addEventListener("keydown", handleKey, true);
+
+          // Hide Amazon's nav bar inside the iframe
+          if (!iframeDoc.getElementById("firetv-sim-iframe-style")) {
+            const style = iframeDoc.createElement("style");
+            style.id = "firetv-sim-iframe-style";
+            style.textContent =
+              "#retail_nav_bar, #nav-main, #nav-belt { height: 0 !important; overflow: hidden !important; }";
+            iframeDoc.head.appendChild(style);
+          }
         }
       } catch {
         // Can't access iframe DOM
@@ -103,6 +117,8 @@ export function VideoPlayer({ titleId, onClose }: Props) {
     };
   }, [titleId]);
 
+  const isVideoUrl = !url;
+
   // Poll the iframe for an actively playing <video> element
   useEffect(() => {
     if (!titleId || !playerUrl) return;
@@ -130,7 +146,15 @@ export function VideoPlayer({ titleId, onClose }: Props) {
     };
 
     const onIframeLoad = () => {
-      // Start polling more aggressively after iframe load
+      if (!isVideoUrl) {
+        // Non-video pages (e.g. Luna detail) — reveal shortly after load
+        fallbackTimer = setTimeout(() => {
+          if (!cancelled) setLoading(false);
+        }, 800);
+        return;
+      }
+
+      // Video pages — poll for playing video
       timer = setInterval(() => {
         if (checkVideo()) {
           if (!cancelled) setLoading(false);

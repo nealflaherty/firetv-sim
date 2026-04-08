@@ -19,6 +19,7 @@ export interface ContentItem {
   thumbnail?: string; // populated in stage 3
   gradient?: string; // gradient background for placeholder tiles
   videoSrc?: string; // trailer video URL for detail panel
+  linkUrl?: string; // custom URL for iframe overlay (e.g. Luna game detail page)
 }
 
 /** Stage 2: Row with content loaded */

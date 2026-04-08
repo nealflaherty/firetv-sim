@@ -7,6 +7,8 @@ import {
   inspectAsinInDom,
   resolvePlaybackUrl,
 } from "../lib/amazonService";
+import { fetchLunaGames } from "../lib/lunaParser";
+import { fetchMyStuff } from "../lib/myStuffParser";
 import "./DebugPage.css";
 
 type LogEntry = { time: string; msg: string; data?: unknown };
@@ -361,6 +363,621 @@ export function DebugPage() {
           disabled={!!loading}
         >
           {loading === "trailer" ? "Resolving…" : "Resolve Trailer"}
+        </button>
+
+        <button
+          onClick={async () => {
+            setLoading("luna");
+            try {
+              const result = await fetchLunaGames();
+              addLog(
+                `Luna: ${result.rows.length} rows, ${result.totalGames} games`,
+              );
+              showData(`Luna: ${result.totalGames} games`, result);
+            } catch (err) {
+              addLog(`Luna error: ${err}`);
+            }
+            setLoading("");
+          }}
+          disabled={!!loading}
+        >
+          {loading === "luna" ? "Fetching…" : "Fetch Luna Games"}
+        </button>
+
+        <button
+          onClick={async () => {
+            setLoading("luna-raw");
+            try {
+              const resp = await fetch("https://www.amazon.com/luna/", {
+                credentials: "include",
+                headers: { Accept: "text/html" },
+              });
+              const html = await resp.text();
+              const doc = new DOMParser().parseFromString(html, "text/html");
+
+              // Gather debug info about the page structure
+              const allLinks = doc.querySelectorAll("a[href]");
+              const lunaLinks: { href: string; text: string; img?: string }[] =
+                [];
+              for (const link of allLinks) {
+                const href = link.getAttribute("href") ?? "";
+                if (href.includes("/luna/") || href.includes("/dp/")) {
+                  const img = link.querySelector("img");
+                  lunaLinks.push({
+                    href,
+                    text: (
+                      link.getAttribute("aria-label") ??
+                      link.textContent?.trim() ??
+                      ""
+                    ).slice(0, 100),
+                    img: img?.getAttribute("src")?.slice(0, 200),
+                  });
+                }
+              }
+
+              const sections = doc.querySelectorAll(
+                "section, [class*='carousel'], [class*='Carousel'], [class*='row'], [class*='Row']",
+              );
+              const sectionInfo = [...sections].slice(0, 30).map((s) => ({
+                tag: s.tagName,
+                class: s.className?.toString().slice(0, 100),
+                testId: s.getAttribute("data-testid"),
+                childCount: s.children.length,
+                text: s.textContent?.trim().slice(0, 150),
+              }));
+
+              addLog(
+                `Luna raw: ${html.length} chars, ${lunaLinks.length} links, ${sections.length} sections`,
+              );
+              showData("Luna page structure", {
+                htmlLength: html.length,
+                linkCount: lunaLinks.length,
+                sectionCount: sections.length,
+                links: lunaLinks.slice(0, 50),
+                sections: sectionInfo,
+                title: doc.title,
+                bodyClasses: doc.body.className,
+              });
+            } catch (err) {
+              addLog(`Luna raw error: ${err}`);
+            }
+            setLoading("");
+          }}
+          disabled={!!loading}
+        >
+          {loading === "luna-raw" ? "Fetching…" : "Luna Raw HTML"}
+        </button>
+
+        <button
+          onClick={async () => {
+            setLoading("luna-deep");
+            try {
+              const resp = await fetch("https://www.amazon.com/luna/", {
+                credentials: "include",
+                headers: { Accept: "text/html" },
+              });
+              const html = await resp.text();
+
+              // Look for embedded JSON data (SPA hydration)
+              const patterns = [
+                {
+                  name: "__NEXT_DATA__",
+                  regex:
+                    /<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/i,
+                },
+                {
+                  name: "window.__data",
+                  regex: /window\.__data\s*=\s*(\{[\s\S]*?\});/i,
+                },
+                {
+                  name: "window.__INITIAL_STATE__",
+                  regex: /window\.__INITIAL_STATE__\s*=\s*(\{[\s\S]*?\});/i,
+                },
+                {
+                  name: "window.__PRELOADED_STATE__",
+                  regex: /window\.__PRELOADED_STATE__\s*=\s*(\{[\s\S]*?\});/i,
+                },
+              ];
+
+              const found: Record<string, unknown> = {};
+              for (const p of patterns) {
+                const m = html.match(p.regex);
+                if (m) {
+                  try {
+                    found[p.name] = {
+                      size: m[1].length,
+                      parsed: JSON.parse(m[1]),
+                    };
+                  } catch {
+                    found[p.name] = {
+                      size: m[1].length,
+                      snippet: m[1].slice(0, 500),
+                    };
+                  }
+                }
+              }
+
+              // Find ALL script tags and categorize them
+              const scriptRegex = /<script[^>]*>([\s\S]*?)<\/script>/gi;
+              let match: RegExpExecArray | null;
+              const scripts: {
+                index: number;
+                length: number;
+                hasJson: boolean;
+                snippet: string;
+                src?: string;
+              }[] = [];
+              let idx = 0;
+              while ((match = scriptRegex.exec(html)) !== null) {
+                const text = match[1];
+                const srcMatch = match[0].match(/src="([^"]+)"/);
+                if (text.length > 100 || srcMatch) {
+                  scripts.push({
+                    index: idx,
+                    length: text.length,
+                    hasJson:
+                      text.includes("{") &&
+                      (text.includes("game") ||
+                        text.includes("Game") ||
+                        text.includes("luna") ||
+                        text.includes("Luna") ||
+                        text.includes("asin") ||
+                        text.includes("ASIN") ||
+                        text.includes("title")),
+                    snippet: text.slice(0, 300),
+                    src: srcMatch?.[1],
+                  });
+                }
+                idx++;
+              }
+
+              // Look for any large JSON-like blobs
+              const jsonBlobRegex = /\{[^{}]{500,}/g;
+              const largeBlobs: { offset: number; snippet: string }[] = [];
+              let blobMatch: RegExpExecArray | null;
+              while ((blobMatch = jsonBlobRegex.exec(html)) !== null) {
+                if (largeBlobs.length >= 10) break;
+                largeBlobs.push({
+                  offset: blobMatch.index,
+                  snippet: blobMatch[0].slice(0, 300),
+                });
+              }
+
+              addLog(
+                `Luna deep: ${scripts.length} scripts, ${Object.keys(found).length} data patterns, ${largeBlobs.length} large blobs`,
+              );
+              showData("Luna deep analysis", {
+                htmlLength: html.length,
+                knownPatterns: found,
+                scripts: scripts.filter(
+                  (s) => s.hasJson || s.length > 500 || s.src,
+                ),
+                allScriptCount: idx,
+                largeJsonBlobs: largeBlobs,
+              });
+            } catch (err) {
+              addLog(`Luna deep error: ${err}`);
+            }
+            setLoading("");
+          }}
+          disabled={!!loading}
+        >
+          {loading === "luna-deep" ? "Analyzing…" : "Luna Deep Scan"}
+        </button>
+
+        <button
+          onClick={async () => {
+            setLoading("luna-api");
+            try {
+              // Try known Luna API patterns
+              const endpoints: {
+                name: string;
+                url: string;
+                method: string;
+                headers: Record<string, string>;
+                body?: string;
+              }[] = [
+                {
+                  name: "Luna catalog (graphql)",
+                  url: "https://www.amazon.com/luna/api/graphql",
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                  },
+                  body: JSON.stringify({
+                    query: "{ catalog { games { id title imageUrl } } }",
+                  }),
+                },
+                {
+                  name: "Luna browse",
+                  url: "https://www.amazon.com/luna/api/browse",
+                  method: "GET",
+                  headers: { Accept: "application/json" },
+                },
+                {
+                  name: "Luna discover",
+                  url: "https://www.amazon.com/luna/api/discover",
+                  method: "GET",
+                  headers: { Accept: "application/json" },
+                },
+                {
+                  name: "Luna home",
+                  url: "https://www.amazon.com/luna/api/home",
+                  method: "GET",
+                  headers: { Accept: "application/json" },
+                },
+                {
+                  name: "Luna games",
+                  url: "https://www.amazon.com/luna/api/games",
+                  method: "GET",
+                  headers: { Accept: "application/json" },
+                },
+                {
+                  name: "Luna subscription premium",
+                  url: "https://www.amazon.com/luna/api/subscription/luna-premium",
+                  method: "GET",
+                  headers: { Accept: "application/json" },
+                },
+              ];
+
+              const results: Record<string, unknown> = {};
+              for (const ep of endpoints) {
+                try {
+                  const resp = await fetch(ep.url, {
+                    method: ep.method,
+                    headers: ep.headers,
+                    credentials: "include",
+                    body: ep.method === "POST" ? ep.body : undefined,
+                  });
+                  const text = await resp.text();
+                  let parsed: unknown;
+                  try {
+                    parsed = JSON.parse(text);
+                  } catch {
+                    parsed = text.slice(0, 500);
+                  }
+                  results[ep.name] = {
+                    status: resp.status,
+                    contentType: resp.headers.get("content-type"),
+                    response: parsed,
+                  };
+                } catch (err) {
+                  results[ep.name] = { error: String(err) };
+                }
+              }
+
+              addLog(`Tried ${endpoints.length} Luna API endpoints`);
+              showData("Luna API probe results", results);
+            } catch (err) {
+              addLog(`Luna API error: ${err}`);
+            }
+            setLoading("");
+          }}
+          disabled={!!loading}
+        >
+          {loading === "luna-api" ? "Probing…" : "Luna API Probe"}
+        </button>
+
+        <button
+          onClick={async () => {
+            setLoading("luna-iframe");
+            try {
+              addLog("Loading Luna in hidden iframe, waiting for render...");
+              const iframe = document.createElement("iframe");
+              iframe.style.cssText =
+                "position:fixed;left:-9999px;width:1280px;height:720px;opacity:0;pointer-events:none;";
+              iframe.src = "https://www.amazon.com/luna/";
+              document.body.appendChild(iframe);
+
+              // Wait for the SPA to render
+              const result = await new Promise<unknown>((resolve) => {
+                let attempts = 0;
+                const maxAttempts = 40; // 20 seconds max
+
+                const poll = () => {
+                  attempts++;
+                  try {
+                    const doc =
+                      iframe.contentDocument ?? iframe.contentWindow?.document;
+                    if (!doc) {
+                      if (attempts < maxAttempts) {
+                        setTimeout(poll, 500);
+                        return;
+                      }
+                      resolve({ error: "Could not access iframe document" });
+                      return;
+                    }
+
+                    // Look for rendered game content
+                    const imgs = doc.querySelectorAll("img[src]");
+                    const links = doc.querySelectorAll(
+                      'a[href*="/luna/"], a[href*="/dp/"]',
+                    );
+                    const allText = doc.body?.textContent?.length ?? 0;
+
+                    if (
+                      links.length > 5 ||
+                      imgs.length > 10 ||
+                      (allText > 50000 && attempts > 10)
+                    ) {
+                      // Looks like content has rendered
+                      const gameLinks: {
+                        href: string;
+                        text: string;
+                        img?: string;
+                      }[] = [];
+                      for (const link of links) {
+                        const href = link.getAttribute("href") ?? "";
+                        if (
+                          href.includes("/dp/") ||
+                          href.includes("/luna/detail") ||
+                          href.includes("/luna/dp")
+                        ) {
+                          const img = link.querySelector("img");
+                          gameLinks.push({
+                            href,
+                            text: (
+                              link.getAttribute("aria-label") ??
+                              img?.getAttribute("alt") ??
+                              link.textContent?.trim() ??
+                              ""
+                            ).slice(0, 100),
+                            img: (img?.getAttribute("src") ?? "").slice(0, 200),
+                          });
+                        }
+                      }
+
+                      const imageList = [...imgs].slice(0, 50).map((img) => {
+                        const el = img as HTMLImageElement;
+                        const ancestors: string[] = [];
+                        let node: Element | null = el;
+                        for (let d = 0; d < 6 && node; d++) {
+                          const tag = node.tagName;
+                          const cls =
+                            node.className?.toString().slice(0, 80) || "";
+                          ancestors.push(tag + (cls ? "." + cls : ""));
+                          node = node.parentElement;
+                        }
+                        const picture = el.closest("picture");
+                        const sources = picture
+                          ? [...picture.querySelectorAll("source")].map(
+                              (s) => ({
+                                srcset: s.getAttribute("srcset")?.slice(0, 150),
+                                media: s.getAttribute("media"),
+                              }),
+                            )
+                          : [];
+                        return {
+                          src: (el.getAttribute("src") ?? "").slice(0, 200),
+                          alt: el.getAttribute("alt")?.slice(0, 120),
+                          ancestors,
+                          sources,
+                          nearestLink: el
+                            .closest("a")
+                            ?.getAttribute("href")
+                            ?.slice(0, 150),
+                        };
+                      });
+
+                      resolve({
+                        attempts,
+                        bodyTextLength: allText,
+                        totalLinks: links.length,
+                        totalImages: imgs.length,
+                        gameLinks: gameLinks.slice(0, 50),
+                        images: imageList,
+                      });
+                    } else if (attempts < maxAttempts) {
+                      setTimeout(poll, 500);
+                    } else {
+                      resolve({
+                        error: "Timed out waiting for content",
+                        attempts,
+                        bodyTextLength: allText,
+                        totalLinks: links.length,
+                        totalImages: imgs.length,
+                        bodySnippet: doc.body?.textContent?.slice(0, 500),
+                      });
+                    }
+                  } catch (err) {
+                    if (attempts < maxAttempts) {
+                      setTimeout(poll, 500);
+                      return;
+                    }
+                    resolve({ error: String(err), attempts });
+                  }
+                };
+
+                iframe.addEventListener("load", () => setTimeout(poll, 2000));
+              });
+
+              iframe.remove();
+              addLog("Luna iframe scan complete");
+              showData("Luna rendered DOM", result);
+            } catch (err) {
+              addLog(`Luna iframe error: ${err}`);
+            }
+            setLoading("");
+          }}
+          disabled={!!loading}
+        >
+          {loading === "luna-iframe" ? "Loading…" : "Luna Iframe Scan"}
+        </button>
+
+        <button
+          onClick={async () => {
+            setLoading("luna-svc");
+            try {
+              // Try different Luna service page types
+              const pageTypes = [
+                { pageType: "home", pageId: "" },
+                { pageType: "browse", pageId: "" },
+                { pageType: "discover", pageId: "" },
+                { pageType: "game_list", pageId: "" },
+                {
+                  pageType: "subscription_detail",
+                  pageId: "amzn1.adg.product.b085trcct6",
+                },
+                { pageType: "subscription_detail", pageId: "B085TRCCT6" },
+                { pageType: "channel_storefront", pageId: "" },
+                { pageType: "storefront", pageId: "" },
+              ];
+
+              const results: Record<string, unknown> = {};
+
+              for (const pt of pageTypes) {
+                const token = btoa(
+                  JSON.stringify({
+                    encryptPageId: false,
+                    pageId: pt.pageId,
+                    pageType: pt.pageType,
+                    productStage: "Release",
+                  }),
+                );
+
+                const body = {
+                  clientContext: {},
+                  dynamicFeatures: [],
+                  featureScheme: "RETAIL_WEB_V1",
+                  inputContext: { gamepadTypes: [] },
+                  serviceToken: token,
+                  timeout: 10000,
+                };
+
+                const label = `${pt.pageType}${pt.pageId ? ` (${pt.pageId})` : ""}`;
+                try {
+                  // Try the likely API endpoint
+                  const resp = await fetch(
+                    "https://www.amazon.com/luna/api/proxy",
+                    {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Accept: "application/json",
+                      },
+                      credentials: "include",
+                      body: JSON.stringify(body),
+                    },
+                  );
+                  const text = await resp.text();
+                  let parsed: unknown;
+                  try {
+                    parsed = JSON.parse(text);
+                  } catch {
+                    parsed = text.slice(0, 1000);
+                  }
+                  results[label] = { status: resp.status, response: parsed };
+                } catch (err) {
+                  results[label] = { error: String(err) };
+                }
+              }
+
+              addLog(`Tried ${pageTypes.length} Luna service page types`);
+              showData("Luna service probe", results);
+            } catch (err) {
+              addLog(`Luna service error: ${err}`);
+            }
+            setLoading("");
+          }}
+          disabled={!!loading}
+        >
+          {loading === "luna-svc" ? "Probing…" : "Luna Service Probe"}
+        </button>
+
+        <button
+          onClick={async () => {
+            setLoading("luna-tempo");
+            try {
+              const ENDPOINT =
+                "https://proxy-prod.us-east-1.tempo.digital.a2z.com/getPageRequest";
+
+              const pageTypes = [
+                { pageType: "home", pageId: "" },
+                { pageType: "browse", pageId: "" },
+                { pageType: "discover", pageId: "" },
+                { pageType: "storefront", pageId: "" },
+                { pageType: "channel_storefront", pageId: "" },
+                { pageType: "subscription_detail", pageId: "B085TRCCT6" },
+                { pageType: "game_list", pageId: "" },
+                { pageType: "all_games", pageId: "" },
+                { pageType: "library", pageId: "" },
+              ];
+
+              const results: Record<string, unknown> = {};
+
+              for (const pt of pageTypes) {
+                const token = btoa(
+                  JSON.stringify({
+                    encryptPageId: false,
+                    pageId: pt.pageId,
+                    pageType: pt.pageType,
+                    productStage: "Release",
+                  }),
+                );
+
+                const body = {
+                  clientContext: {},
+                  dynamicFeatures: [],
+                  featureScheme: "RETAIL_WEB_V1",
+                  inputContext: { gamepadTypes: [] },
+                  serviceToken: token,
+                  timeout: 10000,
+                };
+
+                const label = `${pt.pageType}${pt.pageId ? ` (${pt.pageId})` : ""}`;
+                try {
+                  const resp = await fetch(ENDPOINT, {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Accept: "application/json",
+                    },
+                    credentials: "include",
+                    body: JSON.stringify(body),
+                  });
+                  const text = await resp.text();
+                  let parsed: unknown;
+                  try {
+                    parsed = JSON.parse(text);
+                  } catch {
+                    parsed = text.slice(0, 2000);
+                  }
+                  results[label] = { status: resp.status, response: parsed };
+                } catch (err) {
+                  results[label] = { error: String(err) };
+                }
+              }
+
+              addLog(`Tried ${pageTypes.length} Tempo page types`);
+              showData("Tempo API probe", results);
+            } catch (err) {
+              addLog(`Tempo error: ${err}`);
+            }
+            setLoading("");
+          }}
+          disabled={!!loading}
+        >
+          {loading === "luna-tempo" ? "Probing…" : "Luna Tempo Probe"}
+        </button>
+
+        <button
+          onClick={async () => {
+            setLoading("mystuff");
+            try {
+              const result = await fetchMyStuff();
+              addLog(
+                `My Stuff: ${result.watchlist.length} watchlist, ${result.library.length} library`,
+              );
+              showData("My Stuff", result);
+            } catch (err) {
+              addLog(`My Stuff error: ${err}`);
+            }
+            setLoading("");
+          }}
+          disabled={!!loading}
+        >
+          {loading === "mystuff" ? "Fetching…" : "Fetch My Stuff"}
         </button>
       </div>
 

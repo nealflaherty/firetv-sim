@@ -6,6 +6,7 @@ import { useAmazonData } from "../lib/useAmazonData";
 import { useNavigation, HOME_NAV_INDEX } from "../lib/useNavigation";
 import { generateContentForCategory } from "../lib/placeholderContent";
 import { useMyStuffData } from "../lib/useMyStuffData";
+import { useLunaData } from "../lib/useLunaData";
 import type { ContentItem } from "../lib/types";
 import { HeroTrailer } from "../components/HeroTrailer";
 import { NavBar } from "../components/NavBar";
@@ -30,6 +31,7 @@ export function HomePage() {
   const { trailers, rows, thumbnails, loading } = useHomeData();
   const { rows: amazonRows, resolveTrailer } = useAmazonData();
   const { rows: myStuffRows } = useMyStuffData();
+  const { rows: lunaRows } = useLunaData();
 
   // Build content rows based on selected nav
   const homeContentRows = useMemo(() => {
@@ -55,9 +57,10 @@ export function HomePage() {
       const label = ALL_NAV[navIdx]?.label ?? "Unknown";
       if (label === "Prime Video" && amazonRows.length > 0) return amazonRows;
       if (label === "My Stuff" && myStuffRows.length > 0) return myStuffRows;
+      if (label === "Games" && lunaRows.length > 0) return lunaRows;
       return generateContentForCategory(label);
     },
-    [homeContentRows, amazonRows, myStuffRows],
+    [homeContentRows, amazonRows, myStuffRows, lunaRows],
   );
 
   // Row lengths for navigation bounds
@@ -69,13 +72,17 @@ export function HomePage() {
 
   // --- Video player state ---
   const [playingTitleId, setPlayingTitleId] = useState<string | null>(null);
+  const [playingUrl, setPlayingUrl] = useState<string | null>(null);
   const contentRowsRef = useRef<
     { id: string; title?: string; items: ContentItem[] }[]
   >([]);
 
   const handlePlay = useCallback((rowIdx: number, colIdx: number) => {
     const item = contentRowsRef.current[rowIdx]?.items[colIdx];
-    if (item?.id) setPlayingTitleId(item.id);
+    if (item?.id) {
+      setPlayingTitleId(item.id);
+      setPlayingUrl(item.linkUrl ?? null);
+    }
   }, []);
 
   const nav = useNavigation(maxRowLengths, trailers.length, handlePlay);
@@ -113,7 +120,11 @@ export function HomePage() {
       <FullscreenToggle />
       <VideoPlayer
         titleId={playingTitleId}
-        onClose={() => setPlayingTitleId(null)}
+        url={playingUrl}
+        onClose={() => {
+          setPlayingTitleId(null);
+          setPlayingUrl(null);
+        }}
       />
       <div className="viewport">
         {!loading.trailers && (
