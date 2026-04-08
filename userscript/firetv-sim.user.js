@@ -3,6 +3,7 @@
 // @namespace    https://www.amazon.com/gp/video/storefront/firetv
 // @version      0.4.0
 // @description  Replace Fire TV storefront with firetv-sim prototype
+// @homepageURL  https://www.amazon.com/gp/video/storefront/firetv
 // @match        https://www.amazon.com/gp/video/storefront/firetv*
 // @grant        GM_xmlhttpRequest
 // @connect      localhost
