@@ -11,9 +11,15 @@ interface Props {
   items: ContentItem[];
   focusedIndex: number | null;
   expanded?: boolean;
+  onItemClick?: (index: number) => void;
 }
 
-export function TileRow({ items, focusedIndex, expanded = false }: Props) {
+export function TileRow({
+  items,
+  focusedIndex,
+  expanded = false,
+  onItemClick,
+}: Props) {
   const hasFocus = focusedIndex !== null;
 
   const scrollOffset = useMemo(() => {
@@ -76,6 +82,7 @@ export function TileRow({ items, focusedIndex, expanded = false }: Props) {
               img={item.thumbnail}
               gradient={item.gradient}
               focused={isFocused}
+              onClick={onItemClick ? () => onItemClick(i) : undefined}
               style={{
                 opacity,
                 flexBasis: baseWidth,

@@ -25,12 +25,14 @@ function RowScroller({
   focusedCol,
   inContent,
   scrollToRow,
+  onItemClick,
 }: {
   contentRows: { id: string; title?: string; items: ContentItem[] }[];
   focusedRow: number;
   focusedCol: number;
   inContent: boolean;
   scrollToRow: number;
+  onItemClick?: (rowIndex: number, colIndex: number) => void;
 }) {
   const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [scrollY, setScrollY] = useState(0);
@@ -84,6 +86,9 @@ function RowScroller({
               items={cr.items}
               focusedIndex={isFocusedRow ? focusedCol : null}
               expanded={inContent}
+              onItemClick={
+                onItemClick ? (col) => onItemClick(i, col) : undefined
+              }
             />
           </div>
         );
@@ -334,6 +339,12 @@ export function HomePage() {
             showBreadcrumb={row >= 2}
             breadcrumbLabel={ALL_NAV[selectedNavIndex]?.label ?? ""}
             mode={expanded ? "expanded" : inContent ? "content" : "compact"}
+            onItemClick={(idx) => {
+              expandedRef.current = false;
+              setExpanded(false);
+              setSelectedNavIndex(idx);
+              setPos([0, idx]);
+            }}
           />
 
           {/* Content area — detail text + tile rows */}
@@ -362,6 +373,14 @@ export function HomePage() {
                   focusedCol={col}
                   inContent={inContent}
                   scrollToRow={row >= 2 ? row - 1 : -1}
+                  onItemClick={(rowIdx, colIdx) => {
+                    expandedRef.current = false;
+                    setExpanded(false);
+                    setSelectedNavIndex(
+                      pos[0] === 0 ? pos[1] : selectedNavIndex,
+                    );
+                    setPos([rowIdx + 1, colIdx]);
+                  }}
                 />
               </AnimatePresence>
             </div>

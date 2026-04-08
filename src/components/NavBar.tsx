@@ -13,6 +13,7 @@ interface Props {
   showBreadcrumb?: boolean;
   breadcrumbLabel?: string;
   mode?: "expanded" | "compact" | "content";
+  onItemClick?: (index: number) => void;
 }
 
 const NAV_ITEMS_OFFSET = 0;
@@ -26,6 +27,7 @@ export function NavBar({
   showBreadcrumb = false,
   breadcrumbLabel = "",
   mode = "content",
+  onItemClick,
 }: Props) {
   const isFocusMode = mode === "compact";
 
@@ -46,6 +48,7 @@ export function NavBar({
                 img={item.img}
                 focused={isFocusMode && focusedIndex === idx}
                 selected={!isFocusMode && selectedIndex === idx}
+                onClick={onItemClick ? () => onItemClick(idx) : undefined}
               />
             );
           })}
@@ -64,6 +67,7 @@ export function NavBar({
                 focused={isFocusMode && focusedIndex === idx}
                 selected={!isFocusMode && selectedIndex === idx}
                 variant="app"
+                onClick={onItemClick ? () => onItemClick(idx) : undefined}
               />
             );
           })}
@@ -76,6 +80,9 @@ export function NavBar({
             focused={isFocusMode && focusedIndex === OVERFLOW_INDEX}
             selected={!isFocusMode && selectedIndex === OVERFLOW_INDEX}
             variant="app"
+            onClick={
+              onItemClick ? () => onItemClick(OVERFLOW_INDEX) : undefined
+            }
           />
           <NavItem
             label={NAV_SETTINGS.label}
@@ -83,6 +90,9 @@ export function NavBar({
             focused={isFocusMode && focusedIndex === SETTINGS_INDEX}
             selected={!isFocusMode && selectedIndex === SETTINGS_INDEX}
             variant="app"
+            onClick={
+              onItemClick ? () => onItemClick(SETTINGS_INDEX) : undefined
+            }
           />
         </div>
       </div>

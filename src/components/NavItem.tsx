@@ -7,6 +7,7 @@ interface Props {
   focused?: boolean;
   selected?: boolean;
   variant?: "icon" | "app";
+  onClick?: () => void;
 }
 
 export function NavItem({
@@ -15,12 +16,14 @@ export function NavItem({
   focused = false,
   selected = false,
   variant = "icon",
+  onClick,
 }: Props) {
   const showCircle = (focused || selected) && variant === "icon";
 
   return (
     <div
       className={`nav-item nav-item--${variant}${focused ? " nav-item--focused" : ""}${selected ? " nav-item--selected" : ""}`}
+      onClick={onClick}
     >
       {focused && <div className="nav-item__glow" />}
       {showCircle && <div className="nav-item__circle" />}
