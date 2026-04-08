@@ -26,56 +26,67 @@ const CATEGORY_CONTENT: Record<string, CategoryContent> = {
   "My Stuff": {
     rows: [
       {
-        title: "Purchases and Rentals",
+        title: "Watchlist",
         items: [
           {
             title: "Moana (Bonus Content)",
-            description: "Go behind the scenes of the animated adventure.", thumbnail: F + "Moana__Bonus_Content_.png",
+            description: "Go behind the scenes of the animated adventure.",
+            thumbnail: F + "Moana__Bonus_Content_.png",
           },
           {
             title: "Sesame Street: Elmo Says Boo!",
             description:
-              "Elmo and friends celebrate Halloween on Sesame Street.", thumbnail: F + "Sesame_Street__Elmo_Says_Boo_.png",
+              "Elmo and friends celebrate Halloween on Sesame Street.",
+            thumbnail: F + "Sesame_Street__Elmo_Says_Boo_.png",
           },
           {
             title: "Twilight (4K UHD)",
             description:
-              "A teenage girl risks everything when she falls in love with a vampire.", thumbnail: F + "Twilight__4K_UHD_.png",
+              "A teenage girl risks everything when she falls in love with a vampire.",
+            thumbnail: F + "Twilight__4K_UHD_.png",
           },
           {
             title: "Almost Love",
             description:
-              "Five interconnected couples navigate love in New York City.", thumbnail: F + "Almost_Love.png",
+              "Five interconnected couples navigate love in New York City.",
+            thumbnail: F + "Almost_Love.png",
           },
           {
             title: "Good Will Hunting",
-            description: "A janitor at MIT has a gift for mathematics.", thumbnail: F + "Good_Will_Hunting_-_Edited_Version.png",
+            description: "A janitor at MIT has a gift for mathematics.",
+            thumbnail: F + "Good_Will_Hunting_-_Edited_Version.png",
           },
         ],
       },
       {
-        title: "Watchlist",
+        title: "Purchases and Rentals",
         items: [
           {
             title: "Blaze and the Monster Machines Season 4",
-            description: "Blaze and AJ take on new adventures in Axle City.", thumbnail: F + "Blaze_and_the_Monster_Machines_Season_4.png",
+            description: "Blaze and AJ take on new adventures in Axle City.",
+            thumbnail: F + "Blaze_and_the_Monster_Machines_Season_4.png",
           },
           {
             title: "Supernatural: The Complete Second Season",
             description:
-              "Sam and Dean continue hunting supernatural creatures.", thumbnail: F + "Supernatural__The_Complete_Second_Season.png",
+              "Sam and Dean continue hunting supernatural creatures.",
+            thumbnail: F + "Supernatural__The_Complete_Second_Season.png",
           },
           {
             title: "Nirvanna the Band the Show the Movie",
-            description: "Two best friends try to get a gig at a local bar.", thumbnail: F + "Nirvanna_the_Band_the_Show_the_Movie.png",
+            description: "Two best friends try to get a gig at a local bar.",
+            thumbnail: F + "Nirvanna_the_Band_the_Show_the_Movie.png",
           },
           {
             title: "New Girl Season 4",
-            description: "Jess and her roommates navigate life and love in LA.", thumbnail: F + "New_Girl_Season_4.png",
+            description: "Jess and her roommates navigate life and love in LA.",
+            thumbnail: F + "New_Girl_Season_4.png",
           },
           {
             title: "Planet Earth Season 1",
-            description: "David Attenborough narrates the natural world.", thumbnail: F + "Planet_Earth_Season_1__Narrator_-_David_Attenborough_.png",
+            description: "David Attenborough narrates the natural world.",
+            thumbnail:
+              F + "Planet_Earth_Season_1__Narrator_-_David_Attenborough_.png",
           },
         ],
       },
@@ -143,16 +154,19 @@ const CATEGORY_CONTENT: Record<string, CategoryContent> = {
         items: [
           {
             title: "Appstore",
-            description: "Browse and download apps for your Fire TV.", thumbnail: F + "Appstore.png",
+            description: "Browse and download apps for your Fire TV.",
+            thumbnail: F + "Appstore.png",
           },
           { title: "Free", description: "Watch free movies and TV shows." },
           {
             title: "Movies",
-            description: "Browse movies across all services.", thumbnail: F + "Movies.png",
+            description: "Browse movies across all services.",
+            thumbnail: F + "Movies.png",
           },
           {
             title: "TV Shows",
-            description: "Browse TV shows across all services.", thumbnail: F + "TV_Shows.png",
+            description: "Browse TV shows across all services.",
+            thumbnail: F + "TV_Shows.png",
           },
           { title: "Games", description: "Browse games for your Fire TV." },
         ],
@@ -220,17 +234,20 @@ const CATEGORY_CONTENT: Record<string, CategoryContent> = {
         items: [
           {
             title: "CNN Headlines",
-            description: "Breaking news and live coverage from CNN.", thumbnail: F + "CNN_Headlines.png",
+            description: "Breaking news and live coverage from CNN.",
+            thumbnail: F + "CNN_Headlines.png",
           },
           {
             title: "CSI: Crime Scene Investigation",
             description:
-              "A team of forensic investigators solve crimes in Las Vegas.", thumbnail: F + "CSI__Crime_Scene_Investigation.png",
+              "A team of forensic investigators solve crimes in Las Vegas.",
+            thumbnail: F + "CSI__Crime_Scene_Investigation.png",
           },
           {
             title: "Introduction to Astrophysics",
             description:
-              "Explore the universe through the lens of astrophysics.", thumbnail: F + "Introduction_to_Astrophysics.png",
+              "Explore the universe through the lens of astrophysics.",
+            thumbnail: F + "Introduction_to_Astrophysics.png",
           },
           {
             title: "PAW Patrol",
@@ -239,7 +256,8 @@ const CATEGORY_CONTENT: Record<string, CategoryContent> = {
           {
             title: "South Park",
             description:
-              "The animated comedy series from Trey Parker and Matt Stone.", thumbnail: F + "South_Park.png",
+              "The animated comedy series from Trey Parker and Matt Stone.",
+            thumbnail: F + "South_Park.png",
           },
         ],
       },
@@ -249,13 +267,18 @@ const CATEGORY_CONTENT: Record<string, CategoryContent> = {
           {
             title: "SpongeBob SquarePants",
             description:
-              "The adventures of a sea sponge and his friends in Bikini Bottom.", thumbnail: F + "SpongeBob_SquarePants.png",
+              "The adventures of a sea sponge and his friends in Bikini Bottom.",
+            thumbnail: F + "SpongeBob_SquarePants.png",
           },
           {
             title: "SpongeBob SquarePants Universe",
             description: "Explore the expanded SpongeBob universe.",
           },
-          { title: "CNN Headlines", description: "24/7 news coverage.", thumbnail: F + "CNN_Headlines.png" },
+          {
+            title: "CNN Headlines",
+            description: "24/7 news coverage.",
+            thumbnail: F + "CNN_Headlines.png",
+          },
           { title: "CSI", description: "Crime scene investigation drama." },
           { title: "PAW Patrol", description: "More rescue adventures." },
         ],
@@ -325,24 +348,29 @@ const CATEGORY_CONTENT: Record<string, CategoryContent> = {
           {
             title: "Super Wings S6",
             description:
-              "Jett the jet plane delivers packages to kids around the world.", thumbnail: F + "Super_Wings_S6.png",
+              "Jett the jet plane delivers packages to kids around the world.",
+            thumbnail: F + "Super_Wings_S6.png",
           },
           {
             title: "Thomas & Friends Classic",
-            description: "The classic adventures of Thomas the Tank Engine.", thumbnail: F + "Thomas___Friends_Classic.png",
+            description: "The classic adventures of Thomas the Tank Engine.",
+            thumbnail: F + "Thomas___Friends_Classic.png",
           },
           {
             title: "Tumble Leaf - Season 1",
             description:
-              "A blue fox named Fig explores a whimsical land of adventure.", thumbnail: F + "Tumble_Leaf_-_Season_1.png",
+              "A blue fox named Fig explores a whimsical land of adventure.",
+            thumbnail: F + "Tumble_Leaf_-_Season_1.png",
           },
           {
             title: "Blue's Clues Season 6",
-            description: "Blue and friends solve clues and puzzles together.", thumbnail: F + "Blue_s_Clues_Season_6.png",
+            description: "Blue and friends solve clues and puzzles together.",
+            thumbnail: F + "Blue_s_Clues_Season_6.png",
           },
           {
             title: "Tayo the Little Bus",
-            description: "A friendly little bus learns about the city.", thumbnail: F + "Tayo_the_Little_Bus.png",
+            description: "A friendly little bus learns about the city.",
+            thumbnail: F + "Tayo_the_Little_Bus.png",
           },
         ],
       },
@@ -351,24 +379,31 @@ const CATEGORY_CONTENT: Record<string, CategoryContent> = {
         items: [
           {
             title: "S4: The Bob Lazar Story",
-            description: "The story of Bob Lazar and Area 51.", thumbnail: F + "S4__The_Bob_Lazar_Story.png",
+            description: "The story of Bob Lazar and Area 51.",
+            thumbnail: F + "S4__The_Bob_Lazar_Story.png",
           },
           {
             title: "The Passion of the Christ",
-            description: "The final twelve hours of Jesus of Nazareth's life.", thumbnail: F + "The_Passion_of_the_Christ.png",
+            description: "The final twelve hours of Jesus of Nazareth's life.",
+            thumbnail: F + "The_Passion_of_the_Christ.png",
           },
           {
             title: "PAW Patrol: Rescue Wheels",
-            description: "The pups get new vehicles for their rescue missions.", thumbnail: F + "PAW_Patrol__Rescue_Wheels.png",
+            description: "The pups get new vehicles for their rescue missions.",
+            thumbnail: F + "PAW_Patrol__Rescue_Wheels.png",
           },
           {
             title: "Fire Ants: The Invincible Army",
             description:
-              "A documentary about the remarkable world of fire ants.", thumbnail: F + "Fire_Ants__The_Invincible_Army.png",
+              "A documentary about the remarkable world of fire ants.",
+            thumbnail: F + "Fire_Ants__The_Invincible_Army.png",
           },
           {
             title: "Mafia's Greatest Hits",
-            description: "Stories of the most notorious mobsters in history.", thumbnail: F + "Mafia_s_Greatest_Hits_-_Tony_Spilotro__The_Las_Vegas_Enforcer.png",
+            description: "Stories of the most notorious mobsters in history.",
+            thumbnail:
+              F +
+              "Mafia_s_Greatest_Hits_-_Tony_Spilotro__The_Las_Vegas_Enforcer.png",
           },
         ],
       },
@@ -436,7 +471,8 @@ const CATEGORY_CONTENT: Record<string, CategoryContent> = {
           {
             title: "Mickey Mouse Clubhouse",
             description:
-              "Mickey and friends solve problems using basic skills and teamwork.", thumbnail: F + "Mickey_Mouse_Clubhouse.png",
+              "Mickey and friends solve problems using basic skills and teamwork.",
+            thumbnail: F + "Mickey_Mouse_Clubhouse.png",
           },
           {
             title: "The Lion Guard",
@@ -612,6 +648,7 @@ export function generateContentForCategory(
   const seed = hashCode(category);
   return content.rows.map((row, r) => ({
     id: `${category}-row-${r}`,
+    title: row.title,
     items: row.items.map((item, i) => {
       const idx = seed + r * 7 + i * 3;
       return {

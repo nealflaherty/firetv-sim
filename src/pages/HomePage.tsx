@@ -5,6 +5,7 @@ import { useHomeData } from "../lib/useHomeData";
 import { useAmazonData } from "../lib/useAmazonData";
 import { useNavigation, HOME_NAV_INDEX } from "../lib/useNavigation";
 import { generateContentForCategory } from "../lib/placeholderContent";
+import { useMyStuffData } from "../lib/useMyStuffData";
 import type { ContentItem } from "../lib/types";
 import { HeroTrailer } from "../components/HeroTrailer";
 import { NavBar } from "../components/NavBar";
@@ -28,6 +29,7 @@ const PANEL_Y = {
 export function HomePage() {
   const { trailers, rows, thumbnails, loading } = useHomeData();
   const { rows: amazonRows, resolveTrailer } = useAmazonData();
+  const { rows: myStuffRows } = useMyStuffData();
 
   // Build content rows based on selected nav
   const homeContentRows = useMemo(() => {
@@ -52,9 +54,10 @@ export function HomePage() {
       if (navIdx === HOME_NAV_INDEX) return homeContentRows;
       const label = ALL_NAV[navIdx]?.label ?? "Unknown";
       if (label === "Prime Video" && amazonRows.length > 0) return amazonRows;
+      if (label === "My Stuff" && myStuffRows.length > 0) return myStuffRows;
       return generateContentForCategory(label);
     },
-    [homeContentRows, amazonRows],
+    [homeContentRows, amazonRows, myStuffRows],
   );
 
   // Row lengths for navigation bounds
