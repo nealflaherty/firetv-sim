@@ -7,7 +7,7 @@ import { generateContentForCategory } from "../lib/placeholderContent";
 import type { ContentItem } from "../lib/types";
 import { HeroTrailer } from "../components/HeroTrailer";
 import { NavBar } from "../components/NavBar";
-import { DetailPanel } from "../components/DetailPanel";
+import { DetailPanel, DetailBackground } from "../components/DetailPanel";
 import { TileRow } from "../components/TileRow";
 import { FullscreenToggle } from "../components/FullscreenToggle";
 import "./HomePage.css";
@@ -321,6 +321,12 @@ export function HomePage() {
             </div>
           </div>
 
+          {/* Detail trailer/image — full height, behind nav bar */}
+          <DetailBackground
+            item={inContent ? selectedItem : null}
+            visible={inContent}
+          />
+
           {/* Nav bar */}
           <NavBar
             focusedIndex={row === 0 ? col : null}
@@ -330,7 +336,7 @@ export function HomePage() {
             mode={expanded ? "expanded" : inContent ? "content" : "compact"}
           />
 
-          {/* Content area — detail panel + tile rows */}
+          {/* Content area — detail text + tile rows */}
           <div className="panel__content">
             <AnimatePresence initial={false}>
               {inContent && (

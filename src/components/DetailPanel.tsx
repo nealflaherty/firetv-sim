@@ -4,6 +4,90 @@ import * as dashjs from "dashjs";
 import type { ContentItem } from "../lib/types";
 import "./DetailPanel.css";
 
+// ---------------------------------------------------------------------------
+// DetailBackground — full-height trailer video or hero image
+// Sits behind the nav bar, extends from top of panel to tile rows
+// ---------------------------------------------------------------------------
+
+interface BgProps {
+  item: ContentItem | null;
+  visible: boolean;
+}
+
+export function DetailBackground({ item, visible }: BgProps) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const dashRef = useRef<dashjs.MediaPlayerClass | null>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const src = visible && item?.videoSrc ? item.videoSrc : "";
+    const isDash = src.endsWith(".mpd") || src.includes(".mpd?");
+
+    if (dashRef.current) {
+      dashRef.current.reset();
+      dashRef.current = null;
+    }
+
+    if (!src) {
+      video.pause();
+      video.removeAttribute("src");
+      video.load();
+      return;
+    }
+
+    if (isDash) {
+      const player = dashjs.MediaPlayer().create();
+      player.initialize(video, src, true);
+      player.updateSettings({
+        streaming: { buffer: { fastSwitchEnabled: true } },
+      });
+      dashRef.current = player;
+    } else {
+      video.src = src;
+      video.play().catch(() => {});
+    }
+
+    return () => {
+      if (dashRef.current) {
+        dashRef.current.reset();
+        dashRef.current = null;
+      }
+    };
+  }, [item?.id, item?.videoSrc, visible]);
+
+  const hasVideo = visible && !!item?.videoSrc;
+  const heroImage = item?.thumbnail
+    ? item.thumbnail
+        .replace(/_SX\d+/, "_SX1280")
+        .replace(/_UR\d+,\d+/, "_UR1920,1080")
+    : null;
+
+  if (!visible) return null;
+
+  return (
+    <div className="detail-bg-layer">
+      {heroImage && !hasVideo && (
+        <div
+          className="detail-bg-layer__image"
+          style={{ backgroundImage: `url(${heroImage})` }}
+        />
+      )}
+      <video
+        ref={videoRef}
+        className="detail-bg-layer__video"
+        style={{ display: hasVideo ? undefined : "none" }}
+        playsInline
+      />
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// DetailPanel — text content only (title, meta, description, entitlement)
+// ---------------------------------------------------------------------------
+
 interface Props {
   item: ContentItem | null;
   visible: boolean;
@@ -44,83 +128,18 @@ const lineVariants = {
 
 export function DetailPanel({ item, visible }: Props) {
   const wasVisible = useRef(false);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const dashRef = useRef<dashjs.MediaPlayerClass | null>(null);
 
   useEffect(() => {
     wasVisible.current = visible;
   }, [visible]);
 
-  // Manage DASH playback
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const src = visible && item?.videoSrc ? item.videoSrc : "";
-    const isDash = src.endsWith(".mpd") || src.includes(".mpd?");
-
-    // Clean up previous dash player
-    if (dashRef.current) {
-      dashRef.current.reset();
-      dashRef.current = null;
-    }
-
-    if (!src) {
-      video.pause();
-      video.removeAttribute("src");
-      video.load();
-      return;
-    }
-
-    if (isDash) {
-      const player = dashjs.MediaPlayer().create();
-      player.initialize(video, src, true);
-      player.updateSettings({
-        streaming: { buffer: { fastSwitchEnabled: true } },
-      });
-      dashRef.current = player;
-    } else {
-      video.src = src;
-      video.play().catch(() => {});
-    }
-
-    return () => {
-      if (dashRef.current) {
-        dashRef.current.reset();
-        dashRef.current = null;
-      }
-    };
-  }, [item?.id, item?.videoSrc, visible]);
-
   const delay = wasVisible.current ? 0 : 0.35;
-  const hasVideo = visible && !!item?.videoSrc;
-
-  // Generate a higher-res hero image from the thumbnail URL
-  const heroImage = item?.thumbnail
-    ? item.thumbnail
-        .replace(/_SX\d+/, "_SX1280")
-        .replace(/_UR\d+,\d+/, "_UR1920,1080")
-    : null;
 
   return (
     <div
       className={`detail-panel-wrapper${visible ? " detail-panel-wrapper--open" : ""}`}
     >
       <div className="detail-panel">
-        {/* Background image — shown when no video is playing */}
-        {heroImage && !hasVideo && (
-          <div
-            className="detail-panel__bg"
-            style={{ backgroundImage: `url(${heroImage})` }}
-          />
-        )}
-        {/* Trailer video — single persistent element, src managed by effect */}
-        <video
-          ref={videoRef}
-          className="detail-panel__video"
-          style={{ display: hasVideo ? undefined : "none" }}
-          playsInline
-        />
         <motion.div
           className="detail-panel__content"
           key={item?.id}

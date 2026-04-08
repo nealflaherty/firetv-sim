@@ -1,12 +1,13 @@
 .nav-bar {
   position: relative;
+  z-index: 2;
   width: 100%;
   background: transparent;
   flex-shrink: 0;
   padding: 0.8vw 0 2.5vw;
   overflow: visible;
-  /* Clip glow from bleeding upward into trailer, but allow sides/bottom for scaled icons */
-  clip-path: inset(-1% -10% -50% -10%);
+  /* Clip glow from bleeding upward into trailer, but allow sides/bottom */
+  clip-path: inset(-1% -10% -100% -10%);
   transition: opacity 0.4s ease;
 }
 
@@ -20,6 +21,34 @@
 
 .nav-bar--compact .nav-bar__items {
   background: transparent;
+}
+
+/* Content mode: solid background on nav items with tiny fade below */
+.nav-bar--content:not(.nav-bar--breadcrumb) .nav-bar__items {
+  position: relative;
+}
+
+.nav-bar--content:not(.nav-bar--breadcrumb) .nav-bar__items::before {
+  content: "";
+  position: absolute;
+  top: -20vw;
+  left: -10vw;
+  right: -10vw;
+  bottom: 0;
+  background: var(--color-bg);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.nav-bar--content:not(.nav-bar--breadcrumb) .nav-bar__items::after {
+  content: "";
+  position: absolute;
+  bottom: -12px;
+  left: -10vw;
+  right: -10vw;
+  height: 12px;
+  background: linear-gradient(to bottom, var(--color-bg), transparent);
+  pointer-events: none;
 }
 
 /* Nav items layer */

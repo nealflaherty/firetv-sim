@@ -30,7 +30,9 @@ export function NavBar({
   const isFocusMode = mode === "compact";
 
   return (
-    <div className={`nav-bar nav-bar--${mode}`}>
+    <div
+      className={`nav-bar nav-bar--${mode}${showBreadcrumb ? " nav-bar--breadcrumb" : ""}`}
+    >
       <div
         className={`nav-bar__items${showBreadcrumb ? " nav-bar__items--hidden" : ""}`}
       >

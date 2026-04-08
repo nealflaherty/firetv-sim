@@ -52,6 +52,7 @@
   flex-direction: column;
   flex: 1;
   margin-top: -0.5vw;
+  position: relative;
 }
 
 .tile-scroll {
@@ -102,12 +103,6 @@
   width: 1.4vw;
   border-radius: 0.3vw;
   background: #fff;
-}
-
-.detail-motion-wrapper {
-  position: relative;
-  z-index: 2;
-  overflow: visible;
 }
 
 .tile-section-title {

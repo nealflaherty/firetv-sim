@@ -1,3 +1,70 @@
+/* ---------------------------------------------------------------------------
+   DetailBackground — full-height layer behind nav bar
+   Extends from top of the panel content area to the tile rows
+   --------------------------------------------------------------------------- */
+
+.detail-bg-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* From top of panel down to top of tile items: nav + detail text + section title + margins */
+  height: calc(6vw + 33vh + 6.5vw);
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.detail-bg-layer__image {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center right;
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    transparent 35%,
+    rgba(0, 0, 0, 0.5) 55%,
+    rgba(0, 0, 0, 0.8) 75%,
+    rgba(0, 0, 0, 0.9) 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    transparent 35%,
+    rgba(0, 0, 0, 0.5) 55%,
+    rgba(0, 0, 0, 0.8) 75%,
+    rgba(0, 0, 0, 0.9) 100%
+  );
+}
+
+.detail-bg-layer__video {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 65%;
+  height: 100%;
+  object-fit: cover;
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(0, 0, 0, 0.5) 25%,
+    rgba(0, 0, 0, 0.8) 50%,
+    rgba(0, 0, 0, 1) 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(0, 0, 0, 0.5) 25%,
+    rgba(0, 0, 0, 0.8) 50%,
+    rgba(0, 0, 0, 1) 100%
+  );
+}
+
+/* ---------------------------------------------------------------------------
+   DetailPanel — text content only
+   --------------------------------------------------------------------------- */
+
 .detail-panel-wrapper {
   position: relative;
   z-index: 1;
@@ -15,48 +82,6 @@
   opacity: 1;
 }
 
-/* Background image — positioned right, fades via radial mask */
-.detail-panel__bg {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center right;
-  mask-image: radial-gradient(
-    circle at 100% 0%,
-    rgba(0, 0, 0, 0.6) 0%,
-    transparent 50%
-  );
-  -webkit-mask-image: radial-gradient(
-    circle at 100% 0%,
-    rgba(0, 0, 0, 0.6) 0%,
-    transparent 50%
-  );
-  pointer-events: none;
-}
-
-/* Trailer video — positioned right, fades via same radial mask */
-.detail-panel__video {
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 60%;
-  height: 100%;
-  object-fit: cover;
-  mask-image: linear-gradient(
-    to right,
-    transparent 0%,
-    rgba(0, 0, 0, 0.5) 30%,
-    rgba(0, 0, 0, 0.8) 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent 0%,
-    rgba(0, 0, 0, 0.5) 30%,
-    rgba(0, 0, 0, 0.8) 100%
-  );
-  pointer-events: none;
-}
-
 /* Text content — fixed slot layout */
 .detail-panel__content {
   position: relative;
@@ -71,7 +96,6 @@
   color: var(--color-text);
 }
 
-/* Slot 1: Title — pinned to top */
 .detail-slot--title {
 }
 
@@ -82,7 +106,6 @@
   color: var(--color-text);
 }
 
-/* Slot 2: Rating/metadata row */
 .detail-slot--meta {
 }
 
@@ -105,7 +128,6 @@
   padding: 0.1vw 0.4vw;
 }
 
-/* Slot 3: Description */
 .detail-slot--desc {
 }
 
@@ -115,7 +137,6 @@
   color: var(--color-text-dim);
 }
 
-/* Slot 4: Entitlement/action */
 .detail-slot--action {
 }
 
@@ -131,4 +152,10 @@
 .detail-entitlement__check {
   height: 1.2vw;
   width: auto;
+}
+
+.detail-motion-wrapper {
+  position: relative;
+  z-index: 2;
+  overflow: visible;
 }
