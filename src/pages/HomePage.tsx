@@ -21,6 +21,7 @@ import { FullscreenToggle } from "../components/FullscreenToggle";
 import { ControlsOverlay } from "../components/ControlsOverlay";
 import { VideoPlayer } from "../components/VideoPlayer";
 import { InstallBanner } from "../components/InstallBanner";
+import { Breakout, useKonamiCode } from "../components/Breakout";
 import "./HomePage.css";
 
 const NAV_ROW_LENGTH = ALL_NAV.length;
@@ -141,8 +142,11 @@ export function HomePage() {
       ? PANEL_Y.content
       : PANEL_Y.compact;
 
+  const [konamiActive, konamiClose] = useKonamiCode();
+
   return (
     <div className="home-page">
+      {konamiActive && <Breakout onClose={konamiClose} />}
       <InstallBanner />
       <ControlsOverlay />
       <FullscreenToggle />

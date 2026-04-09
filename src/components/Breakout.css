@@ -1,0 +1,12 @@
+.breakout-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10003;
+  background: #0a0a12;
+}
+
+.breakout-overlay canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
